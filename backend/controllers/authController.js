@@ -26,11 +26,11 @@ export const registerMentor = async (req, res) => {
       userExists.otp = { code: otpCode, expiresAt: otpExpires };
       await userExists.save();
 
-      await sendEmail({
+      sendEmail({
         email: userExists.email,
         subject: 'Mentor Verification OTP',
         html: otpTemplate(otpCode),
-      });
+      }).catch(err => console.error('Error sending email:', err));
 
       return res.status(201).json({
         message: 'Registration successful. Please verify your email with the OTP sent.',
@@ -54,11 +54,11 @@ export const registerMentor = async (req, res) => {
 
     if (user) {
       // Send OTP email
-      await sendEmail({
+      sendEmail({
         email: user.email,
         subject: 'Mentor Verification OTP',
         html: otpTemplate(otpCode),
-      });
+      }).catch(err => console.error('Error sending email:', err));
       res.status(201).json({
         message: 'Registration successful. Please verify your email with the OTP sent.',
         email: user.email,
@@ -85,11 +85,11 @@ export const sendOtp = async (req, res) => {
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
     user.otp = { code: otpCode, expiresAt: otpExpires };
     await user.save();
-    await sendEmail({
+    sendEmail({
       email: user.email,
       subject: 'Your OTP Code',
       html: otpTemplate(otpCode),
-    });
+    }).catch(err => console.error('Error sending email:', err));
     res.json({ message: 'OTP sent successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -110,11 +110,11 @@ export const verifyOTP = async (req, res) => {
       user.isVerified = true;
       user.otp = undefined;
       await user.save();
-      await sendEmail({
+      sendEmail({
         email: user.email,
         subject: 'Welcome to V-Learn',
         html: welcomeTemplate(user.name),
-      });
+      }).catch(err => console.error('Error sending email:', err));
       res.json({
         _id: user._id,
         name: user.name,
@@ -152,11 +152,11 @@ export const registerUser = async (req, res) => {
       userExists.otp = { code: otpCode, expiresAt: otpExpires };
       await userExists.save();
 
-      await sendEmail({
+      sendEmail({
         email: userExists.email,
         subject: 'Signup Verification OTP',
         html: otpTemplate(otpCode),
-      });
+      }).catch(err => console.error('Error sending email:', err));
 
       return res.status(201).json({
         message: 'Registration successful. Please verify your email with the OTP sent.',
@@ -179,11 +179,11 @@ export const registerUser = async (req, res) => {
 
     if (user) {
       // Send OTP email
-      await sendEmail({
+      sendEmail({
         email: user.email,
         subject: 'Signup Verification OTP',
         html: otpTemplate(otpCode),
-      });
+      }).catch(err => console.error('Error sending email:', err));
       res.status(201).json({
         message: 'Registration successful. Please verify your email with the OTP sent.',
         email: user.email,
@@ -240,11 +240,11 @@ export const forgotPassword = async (req, res) => {
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
     user.passwordResetOtp = { code: otpCode, expiresAt: otpExpires };
     await user.save();
-    await sendEmail({
+    sendEmail({
       email: user.email,
       subject: 'Password Reset OTP',
       html: resetPasswordTemplate(otpCode),
-    });
+    }).catch(err => console.error('Error sending email:', err));
     res.json({ message: 'Password reset OTP sent' });
   } catch (error) {
     res.status(500).json({ message: error.message });
