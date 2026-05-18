@@ -25,6 +25,7 @@ export const registerMentor = async (req, res) => {
       const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
       userExists.otp = { code: otpCode, expiresAt: otpExpires };
       await userExists.save();
+      console.log(`[VERIFICATION OTP] Mentor unverified signup for ${userExists.email}. OTP: ${otpCode}`);
 
       sendEmail({
         email: userExists.email,
@@ -41,6 +42,7 @@ export const registerMentor = async (req, res) => {
     // Generate OTP (6 digits, expires in 5 minutes)
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+    console.log(`[VERIFICATION OTP] Mentor fresh signup for ${email}. OTP: ${otpCode}`);
 
     const user = await User.create({
       name,
@@ -85,6 +87,7 @@ export const sendOtp = async (req, res) => {
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
     user.otp = { code: otpCode, expiresAt: otpExpires };
     await user.save();
+    console.log(`[VERIFICATION OTP] Resend OTP for ${user.email}. OTP: ${otpCode}`);
     sendEmail({
       email: user.email,
       subject: 'Your OTP Code',
@@ -151,6 +154,7 @@ export const registerUser = async (req, res) => {
       const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
       userExists.otp = { code: otpCode, expiresAt: otpExpires };
       await userExists.save();
+      console.log(`[VERIFICATION OTP] Student unverified signup for ${userExists.email}. OTP: ${otpCode}`);
 
       sendEmail({
         email: userExists.email,
@@ -167,6 +171,7 @@ export const registerUser = async (req, res) => {
     // Generate OTP (6 digits, expires in 5 minutes)
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+    console.log(`[VERIFICATION OTP] Student fresh signup for ${email}. OTP: ${otpCode}`);
 
     const user = await User.create({
       name,
@@ -240,6 +245,7 @@ export const forgotPassword = async (req, res) => {
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
     user.passwordResetOtp = { code: otpCode, expiresAt: otpExpires };
     await user.save();
+    console.log(`[PASSWORD RESET OTP] Forgot password reset for ${user.email}. OTP: ${otpCode}`);
     sendEmail({
       email: user.email,
       subject: 'Password Reset OTP',
