@@ -45,6 +45,15 @@ app.use('/api/doubts', doubtRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/bookings', bookingRoutes);
 
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'V-Learn Backend Server is running successfully!' });
+});
+
+app.get('/api', (req, res) => {
+  res.json({ status: 'ok', message: 'V-Learn API is active!' });
+});
+
+
 
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 

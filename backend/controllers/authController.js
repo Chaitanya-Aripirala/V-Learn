@@ -12,7 +12,30 @@ export const registerMentor = async (req, res) => {
   try {
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      if (userExists.isVerified) {
+        return res.status(400).json({ message: 'User already exists' });
+      }
+      
+      // If unverified, let's update their details, generate a new OTP, and proceed
+      userExists.name = name;
+      userExists.mobileNumber = mobileNumber;
+      userExists.password = password; // Pre-save hook will hash it
+      userExists.bankDetails = bankDetails || {};
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+      userExists.otp = { code: otpCode, expiresAt: otpExpires };
+      await userExists.save();
+
+      await sendEmail({
+        email: userExists.email,
+        subject: 'Mentor Verification OTP',
+        html: otpTemplate(otpCode),
+      });
+
+      return res.status(201).json({
+        message: 'Registration successful. Please verify your email with the OTP sent.',
+        email: userExists.email,
+      });
     }
 
     // Generate OTP (6 digits, expires in 5 minutes)
@@ -116,7 +139,29 @@ export const registerUser = async (req, res) => {
   try {
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      if (userExists.isVerified) {
+        return res.status(400).json({ message: 'User already exists' });
+      }
+      
+      // If unverified, let's update their details, generate a new OTP, and proceed
+      userExists.name = name;
+      userExists.password = password; // Pre-save hook will hash it
+      userExists.branch = branch;
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+      userExists.otp = { code: otpCode, expiresAt: otpExpires };
+      await userExists.save();
+
+      await sendEmail({
+        email: userExists.email,
+        subject: 'Signup Verification OTP',
+        html: otpTemplate(otpCode),
+      });
+
+      return res.status(201).json({
+        message: 'Registration successful. Please verify your email with the OTP sent.',
+        email: userExists.email,
+      });
     }
 
     // Generate OTP (6 digits, expires in 5 minutes)
