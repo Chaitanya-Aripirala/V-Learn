@@ -20,9 +20,11 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/auth/register', { name, email, password, branch });
-      setIsVerifying(true);
-      alert('OTP sent to your email!');
+      const res = await api.post('/auth/register', { name, email, password, branch });
+      setUser(res.data);
+      localStorage.setItem('user', JSON.stringify(res.data));
+      alert('Registration successful!');
+      navigate('/');
     } catch (error) {
       alert(error.response?.data?.message || 'Error registering');
     } finally {

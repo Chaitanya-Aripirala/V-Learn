@@ -61,8 +61,9 @@ const MentorRegister = () => {
     setLoading(true);
     setError('');
     try {
-      const { data } = await api.post('/auth/mentor/register', formData);
-      setStep(3); // OTP Step
+      await api.post('/auth/mentor/register', formData);
+      alert('Registration successful! Please login.');
+      navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {

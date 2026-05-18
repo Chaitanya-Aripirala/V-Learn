@@ -3,7 +3,7 @@ import generateToken from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import { otpTemplate, welcomeTemplate, resetPasswordTemplate } from '../utils/emailTemplates.js';
 
-// @desc    Register a new mentor (sends OTP email)
+// @desc    Register a new mentor (instantly verified, no OTP)
 // @route   POST /api/auth/mentor/register
 // @access  Public
 export const registerMentor = async (req, res) => {
@@ -12,37 +12,8 @@ export const registerMentor = async (req, res) => {
   try {
     const userExists = await User.findOne({ email });
     if (userExists) {
-      if (userExists.isVerified) {
-        return res.status(400).json({ message: 'User already exists' });
-      }
-      
-      // If unverified, let's update their details, generate a new OTP, and proceed
-      userExists.name = name;
-      userExists.mobileNumber = mobileNumber;
-      userExists.password = password; // Pre-save hook will hash it
-      userExists.bankDetails = bankDetails || {};
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
-      userExists.otp = { code: otpCode, expiresAt: otpExpires };
-      await userExists.save();
-      console.log(`[VERIFICATION OTP] Mentor unverified signup for ${userExists.email}. OTP: ${otpCode}`);
-
-      sendEmail({
-        email: userExists.email,
-        subject: 'Mentor Verification OTP',
-        html: otpTemplate(otpCode),
-      }).catch(err => console.error('Error sending email:', err));
-
-      return res.status(201).json({
-        message: 'Registration successful. Please verify your email with the OTP sent.',
-        email: userExists.email,
-      });
+      return res.status(400).json({ message: 'User already exists' });
     }
-
-    // Generate OTP (6 digits, expires in 5 minutes)
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
-    console.log(`[VERIFICATION OTP] Mentor fresh signup for ${email}. OTP: ${otpCode}`);
 
     const user = await User.create({
       name,
@@ -51,19 +22,18 @@ export const registerMentor = async (req, res) => {
       password,
       role: 'mentor',
       bankDetails: bankDetails || {},
-      otp: { code: otpCode, expiresAt: otpExpires },
+      isVerified: true, // Auto-verify mentor
     });
 
     if (user) {
-      // Send OTP email
-      sendEmail({
-        email: user.email,
-        subject: 'Mentor Verification OTP',
-        html: otpTemplate(otpCode),
-      }).catch(err => console.error('Error sending email:', err));
       res.status(201).json({
-        message: 'Registration successful. Please verify your email with the OTP sent.',
+        _id: user._id,
+        name: user.name,
         email: user.email,
+        role: user.role,
+        mobileNumber: user.mobileNumber,
+        bankDetails: user.bankDetails,
+        token: generateToken(user._id),
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -73,67 +43,21 @@ export const registerMentor = async (req, res) => {
   }
 };
 
-// @desc    Resend OTP (if needed)
+// @desc    Resend OTP (stubbed/bypassed)
 // @route   POST /api/auth/send-otp
 // @access  Public
 export const sendOtp = async (req, res) => {
-  const { email } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
-    user.otp = { code: otpCode, expiresAt: otpExpires };
-    await user.save();
-    console.log(`[VERIFICATION OTP] Resend OTP for ${user.email}. OTP: ${otpCode}`);
-    sendEmail({
-      email: user.email,
-      subject: 'Your OTP Code',
-      html: otpTemplate(otpCode),
-    }).catch(err => console.error('Error sending email:', err));
-    res.json({ message: 'OTP sent successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  res.json({ message: 'OTP send bypassed' });
 };
 
-// @desc    Verify OTP for mentor registration
+// @desc    Verify OTP (stubbed/bypassed)
 // @route   POST /api/auth/verify-otp
 // @access  Public
 export const verifyOTP = async (req, res) => {
-  const { email, code } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    if (user.otp && user.otp.code === code && user.otp.expiresAt > Date.now()) {
-      user.isVerified = true;
-      user.otp = undefined;
-      await user.save();
-      sendEmail({
-        email: user.email,
-        subject: 'Welcome to V-Learn',
-        html: welcomeTemplate(user.name),
-      }).catch(err => console.error('Error sending email:', err));
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid or expired OTP' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  res.json({ message: 'OTP verification bypassed' });
 };
 
-// @desc    Register a new student (sends OTP email)
+// @desc    Register a new student (instantly verified, no OTP)
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = async (req, res) => {
@@ -142,36 +66,8 @@ export const registerUser = async (req, res) => {
   try {
     const userExists = await User.findOne({ email });
     if (userExists) {
-      if (userExists.isVerified) {
-        return res.status(400).json({ message: 'User already exists' });
-      }
-      
-      // If unverified, let's update their details, generate a new OTP, and proceed
-      userExists.name = name;
-      userExists.password = password; // Pre-save hook will hash it
-      userExists.branch = branch;
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
-      userExists.otp = { code: otpCode, expiresAt: otpExpires };
-      await userExists.save();
-      console.log(`[VERIFICATION OTP] Student unverified signup for ${userExists.email}. OTP: ${otpCode}`);
-
-      sendEmail({
-        email: userExists.email,
-        subject: 'Signup Verification OTP',
-        html: otpTemplate(otpCode),
-      }).catch(err => console.error('Error sending email:', err));
-
-      return res.status(201).json({
-        message: 'Registration successful. Please verify your email with the OTP sent.',
-        email: userExists.email,
-      });
+      return res.status(400).json({ message: 'User already exists' });
     }
-
-    // Generate OTP (6 digits, expires in 5 minutes)
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
-    console.log(`[VERIFICATION OTP] Student fresh signup for ${email}. OTP: ${otpCode}`);
 
     const user = await User.create({
       name,
@@ -179,19 +75,19 @@ export const registerUser = async (req, res) => {
       password,
       branch,
       role: 'user',
-      otp: { code: otpCode, expiresAt: otpExpires },
+      isVerified: true, // Auto-verify student
     });
 
     if (user) {
-      // Send OTP email
-      sendEmail({
-        email: user.email,
-        subject: 'Signup Verification OTP',
-        html: otpTemplate(otpCode),
-      }).catch(err => console.error('Error sending email:', err));
       res.status(201).json({
-        message: 'Registration successful. Please verify your email with the OTP sent.',
+        _id: user._id,
+        name: user.name,
         email: user.email,
+        role: user.role,
+        branch: user.branch,
+        enrolledCourses: user.enrolledCourses,
+        cart: user.cart,
+        token: generateToken(user._id),
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -209,9 +105,6 @@ export const loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
-      if (!user.isVerified) {
-        return res.status(401).json({ message: 'Please verify your email first', requiresVerification: true });
-      }
       res.json({
         _id: user._id,
         name: user.name,
