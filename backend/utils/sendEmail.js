@@ -13,7 +13,7 @@ const sendEmail = async (options) => {
     });
 
     const mailOptions = {
-      from: `"Udemy Clone" <${process.env.EMAIL_USER}>`,
+      from: `"V-Learn" <${process.env.EMAIL_USER}>`,
       to: options.email,
       subject: options.subject,
       html: options.html,

@@ -28,7 +28,7 @@ const uploadToCloudinary = (file) => {
 
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        folder: 'udemy_uploads',
+        folder: 'vlearn_uploads',
         resource_type: resource_type,
       },
       (error, result) => {

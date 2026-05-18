@@ -89,7 +89,7 @@ export const verifyOTP = async (req, res) => {
       await user.save();
       await sendEmail({
         email: user.email,
-        subject: 'Welcome to Udemy Clone',
+        subject: 'Welcome to V-Learn',
         html: welcomeTemplate(user.name),
       });
       res.json({
