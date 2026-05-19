@@ -9,6 +9,10 @@ const router = express.Router();
 // @desc    Create a new doubt
 // @route   POST /api/doubts
 router.post('/', protect, async (req, res) => {
+  if (req.user.role === 'mentor') {
+    return res.status(400).json({ message: 'Mentors cannot ask doubts.' });
+  }
+
   const { mentorId, courseId, question } = req.body;
 
   if (!question?.trim()) {

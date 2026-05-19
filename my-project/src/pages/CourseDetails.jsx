@@ -760,12 +760,14 @@ const CourseDetails = () => {
               <MessageSquare className="w-6 h-6 text-blue-600" /> Community & Doubts
             </h2>
             <div className="flex gap-3">
-              <button 
-                onClick={() => setShowDoubtModal(true)}
-                className="bg-purple-100 text-purple-700 px-6 py-2 rounded-full font-bold hover:bg-purple-200 transition-all active:scale-95 flex items-center gap-2"
-              >
-                <HelpCircle className="w-4 h-4" /> Ask Doubt
-              </button>
+              {!isMentor && isEnrolled && (
+                <button 
+                  onClick={() => setShowDoubtModal(true)}
+                  className="bg-purple-100 text-purple-700 px-6 py-2 rounded-full font-bold hover:bg-purple-200 transition-all active:scale-95 flex items-center gap-2"
+                >
+                  <HelpCircle className="w-4 h-4" /> Ask Doubt
+                </button>
+              )}
               {!isMentor && isEnrolled && (
                 <button 
                   onClick={() => setShowBookingModal(true)}
