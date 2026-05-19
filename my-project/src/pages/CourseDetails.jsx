@@ -565,16 +565,32 @@ const CourseDetails = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <a href={course.resources} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-6 bg-blue-50 border border-blue-100 rounded-xl hover:shadow-md transition-shadow group">
-                <BookOpen className="w-8 h-8 text-blue-600 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="font-bold text-blue-700">Resources</span>
-                <span className="text-xs text-blue-500 mt-1">Study materials & notes</span>
-              </a>
-              <a href={course.liveLink} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-6 bg-green-50 border border-green-100 rounded-xl hover:shadow-md transition-shadow group">
-                <Radio className="w-8 h-8 text-green-600 mb-2 group-hover:scale-110 transition-transform animate-pulse" />
-                <span className="font-bold text-green-700">Live Class</span>
-                <span className="text-xs text-green-500 mt-1">Join the next session</span>
-              </a>
+              {course.resources && course.resources.trim() !== '' ? (
+                <a href={course.resources} download target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-6 bg-blue-50 border border-blue-100 rounded-xl hover:shadow-md transition-shadow group">
+                  <BookOpen className="w-8 h-8 text-blue-600 mb-2 group-hover:scale-110 transition-transform" />
+                  <span className="font-bold text-blue-700">Download Resources</span>
+                  <span className="text-xs text-blue-500 mt-1">Study materials & notes ready</span>
+                </a>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-6 bg-gray-50 border border-gray-200 rounded-xl cursor-not-allowed">
+                  <BookOpen className="w-8 h-8 text-gray-400 mb-2" />
+                  <span className="font-bold text-gray-500">No Resources</span>
+                  <span className="text-xs text-gray-400 mt-1">No study materials posted yet</span>
+                </div>
+              )}
+              {course.liveLink && course.liveLink.trim() !== '' ? (
+                <a href={course.liveLink} target="_blank" rel="noreferrer" className="flex flex-col items-center justify-center p-6 bg-green-50 border border-green-100 rounded-xl hover:shadow-md transition-shadow group">
+                  <Radio className="w-8 h-8 text-green-600 mb-2 group-hover:scale-110 transition-transform animate-pulse" />
+                  <span className="font-bold text-green-700">Live Class</span>
+                  <span className="text-xs text-green-500 mt-1">Join the next session</span>
+                </a>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-6 bg-gray-50 border border-gray-200 rounded-xl cursor-not-allowed">
+                  <Radio className="w-8 h-8 text-gray-400 mb-2" />
+                  <span className="font-bold text-gray-500">No Live Class</span>
+                  <span className="text-xs text-gray-400 mt-1">No live sessions scheduled yet</span>
+                </div>
+              )}
             </div>
           </div>
 

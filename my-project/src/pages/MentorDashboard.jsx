@@ -56,6 +56,12 @@ const MentorDashboard = () => {
   // File Upload State
   const [uploadingFiles, setUploadingFiles] = useState({});
 
+  // Resource Management State
+  const [showResourceManager, setShowResourceManager] = useState(false);
+  const [selectedCourseForResource, setSelectedCourseForResource] = useState(null);
+  const [newResourceLink, setNewResourceLink] = useState('');
+  const [isSavingResource, setIsSavingResource] = useState(false);
+
   useEffect(() => {
     if (user?.role !== 'mentor') {
       navigate('/');
@@ -109,6 +115,8 @@ const MentorDashboard = () => {
       
       if (fieldType === 'resources') {
         setResources(url);
+      } else if (fieldType === 'modal-resources') {
+        setNewResourceLink(url);
       } else if (fieldType === 'videoUrl' && index !== null) {
         updateVideoRow(index, 'url', url);
       }
@@ -301,6 +309,29 @@ const MentorDashboard = () => {
     setSelectedCourseForExam(course);
     setShowExamManager(true);
     fetchExams(course._id);
+  };
+
+  const handleOpenResourceManager = (course) => {
+    setSelectedCourseForResource(course);
+    setNewResourceLink(course.resources || '');
+    setShowResourceManager(true);
+  };
+
+  const handleSaveResource = async () => {
+    if (!selectedCourseForResource) return;
+    setIsSavingResource(true);
+    try {
+      await api.put(`/courses/${selectedCourseForResource._id}`, {
+        resources: newResourceLink
+      });
+      alert('Resource updated and published successfully!');
+      setCourses(prev => prev.map(c => c._id === selectedCourseForResource._id ? { ...c, resources: newResourceLink } : c));
+      setShowResourceManager(false);
+    } catch (error) {
+      alert('Failed to save resource: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setIsSavingResource(false);
+    }
   };
 
   const fetchExams = async (courseId) => {
@@ -649,12 +680,20 @@ const MentorDashboard = () => {
                       <span>{course.accessPeriod} Days Access</span>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleOpenExamManager(course)}
-                    className="w-full bg-indigo-600 text-white py-2 text-xs font-bold hover:bg-indigo-700 flex items-center justify-center gap-2"
-                  >
-                    <ClipboardList className="w-4 h-4" /> MANAGE EXAMS
-                  </button>
+                  <div className="flex border-t">
+                    <button 
+                      onClick={() => handleOpenExamManager(course)}
+                      className="flex-1 bg-indigo-600 text-white py-2 text-xs font-bold hover:bg-indigo-700 flex items-center justify-center gap-2 border-r border-indigo-500"
+                    >
+                      <ClipboardList className="w-4 h-4" /> MANAGE EXAMS
+                    </button>
+                    <button 
+                      onClick={() => handleOpenResourceManager(course)}
+                      className="flex-1 bg-blue-600 text-white py-2 text-xs font-bold hover:bg-blue-700 flex items-center justify-center gap-2"
+                    >
+                      <BookOpen className="w-4 h-4" /> UPLOAD RESOURCES
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -795,6 +834,106 @@ const MentorDashboard = () => {
                   ) : (
                     <p className="text-center py-10 text-gray-400 text-sm">No exams created for this course.</p>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Resource Manager Overlay */}
+        {showResourceManager && selectedCourseForResource && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
+              <div className="p-6 border-b flex items-center justify-between bg-blue-600 text-white">
+                <div>
+                  <h2 className="text-xl font-black flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" /> Resource Manager
+                  </h2>
+                  <p className="text-xs opacity-90">{selectedCourseForResource.title}</p>
+                </div>
+                <button onClick={() => setShowResourceManager(false)} className="hover:bg-white/20 p-2 rounded-full transition-all">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Current Resource */}
+                {selectedCourseForResource.resources ? (
+                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600">
+                        <BookOpen className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-black text-blue-600 uppercase tracking-widest">Active Study Resource</p>
+                        <p className="text-sm font-bold text-gray-800 truncate max-w-[200px]">
+                          {selectedCourseForResource.resources.split('/').pop()}
+                        </p>
+                      </div>
+                    </div>
+                    <a 
+                      href={selectedCourseForResource.resources} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="bg-white hover:bg-gray-50 border text-gray-700 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
+                    >
+                      View / Test
+                    </a>
+                  </div>
+                ) : (
+                  <div className="border border-dashed border-gray-200 p-6 rounded-2xl text-center text-gray-400">
+                    <BookOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <p className="text-sm font-bold">No resources uploaded yet</p>
+                    <p className="text-xs mt-1 text-gray-400">Upload a resource below so enrolled students can access it.</p>
+                  </div>
+                )}
+
+                {/* Upload Section */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Upload Resource File (PDF, Zip, doc, etc.)</label>
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="file" 
+                        className="flex-1 border-2 border-gray-100 p-3 rounded-2xl text-xs bg-gray-50 focus:bg-white focus:border-blue-500 outline-none transition-all"
+                        onChange={(e) => handleFileUpload(e, 'modal-resources')} 
+                        disabled={uploadingFiles['modal-resources']} 
+                      />
+                      {uploadingFiles['modal-resources'] && (
+                        <span className="text-xs text-blue-600 font-bold animate-pulse flex items-center gap-1">
+                          <UploadCloud className="w-4 h-4" /> Uploading...
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Or Paste Resource URL</label>
+                    <input 
+                      type="url" 
+                      placeholder="e.g. https://drive.google.com/..." 
+                      className="w-full border-2 border-gray-100 p-4 rounded-2xl text-sm focus:border-blue-500 focus:bg-white outline-none transition-all bg-gray-50 text-gray-800 font-semibold"
+                      value={newResourceLink} 
+                      onChange={e => setNewResourceLink(e.target.value)} 
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <button 
+                    onClick={handleSaveResource}
+                    disabled={isSavingResource}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl text-sm transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2"
+                  >
+                    {isSavingResource ? 'Saving...' : 'Save & Publish'}
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowResourceManager(false)} 
+                    className="px-6 border-2 border-gray-100 hover:bg-gray-50 text-gray-500 font-bold rounded-2xl text-sm transition-all"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>

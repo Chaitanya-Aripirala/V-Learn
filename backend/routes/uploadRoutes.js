@@ -22,8 +22,6 @@ const uploadToCloudinary = (file) => {
       resource_type = 'video';
     } else if (file.mimetype.startsWith('image/')) {
       resource_type = 'image';
-    } else if (file.mimetype === 'application/pdf') {
-      resource_type = 'raw';
     }
 
     const uploadStream = cloudinary.uploader.upload_stream(
