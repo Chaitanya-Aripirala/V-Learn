@@ -15,7 +15,6 @@ import EditProfile from './pages/EditProfile';
 import Certificate from './pages/Certificate';
 import Sessions from './pages/Sessions';
 import Doubts from './pages/Doubts';
-import StudentAnalytics from './pages/StudentAnalytics';
 
 import Footer from './components/Footer';
 import ChatBot from './components/ChatBot';
@@ -42,7 +41,6 @@ function App() {
             <Route path="/certificate/:enrollmentId" element={<Certificate />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/doubts" element={<Doubts />} />
-            <Route path="/analytics" element={<StudentAnalytics />} />
           </Routes>
         </main>
         <Footer />

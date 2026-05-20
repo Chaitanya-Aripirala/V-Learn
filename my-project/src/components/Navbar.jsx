@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Search, ShoppingCart, Library as LibraryIcon, Video as VideoIcon, MessageSquare, Activity } from 'lucide-react';
+import { Search, ShoppingCart, Library as LibraryIcon, Video as VideoIcon, MessageSquare } from 'lucide-react';
 import api from '../services/api';
 
 const Navbar = () => {
@@ -159,11 +159,6 @@ const Navbar = () => {
               <Link to="/doubts" className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-violet-600 transition-colors">
                 <MessageSquare className="w-4 h-4" /> Doubts
               </Link>
-              {user.role === 'student' && (
-                <Link to="/analytics" className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-indigo-600 transition-colors">
-                  <Activity className="w-4 h-4" /> Analytics
-                </Link>
-              )}
               <Link to={user.role === 'mentor' ? '/mentor-dashboard' : '/my-courses'} className="text-sm font-semibold text-gray-700 hover:text-purple-700 transition-colors">
                 {user.role === 'mentor' ? 'Instructor Dashboard' : 'My Learning'}
               </Link>
@@ -181,9 +176,6 @@ const Navbar = () => {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                   <Link to="/profile" className="block px-5 py-2 hover:bg-gray-50 text-sm text-gray-700 font-medium">Edit profile</Link>
-                  {user.role === 'student' && (
-                    <Link to="/analytics" className="block px-5 py-2 hover:bg-gray-50 text-sm text-indigo-600 font-bold">My Analytics</Link>
-                  )}
                   <button onClick={handleLogout} className="w-full text-left px-5 py-2 hover:bg-gray-50 text-sm text-red-600 font-medium">Log out</button>
                 </div>
               </div>
