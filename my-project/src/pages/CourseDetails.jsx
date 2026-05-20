@@ -49,6 +49,23 @@ const CourseDetails = () => {
   const [uploadingResource, setUploadingResource] = useState(false);
   const [isSavingResource, setIsSavingResource] = useState(false);
 
+  // Helpers for Cloudinary resource URLs
+  const getViewUrl = (url) => {
+    if (!url) return '#';
+    // For Cloudinary raw-uploaded files, ensure we use the raw delivery URL
+    return url;
+  };
+
+  const getDownloadUrl = (url, name) => {
+    if (!url) return '#';
+    // For any Cloudinary URL (image OR raw type), add fl_attachment to force browser download
+    if (url.includes('res.cloudinary.com')) {
+      // Insert fl_attachment after /upload/
+      return url.replace('/upload/', '/upload/fl_attachment/');
+    }
+    return url;
+  };
+
   const handleBooking = async (e) => {
     e.preventDefault();
     if (!bookingTopic.trim() || !bookingDate || !bookingTime) {
@@ -939,14 +956,26 @@ const CourseDetails = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          {/* View button - opens in new tab */}
                           <a
-                            href={res.url}
+                            href={getViewUrl(res.url)}
                             target="_blank"
                             rel="noreferrer"
-                            className="bg-white hover:bg-purple-600 hover:text-white text-purple-600 border border-purple-100 p-2 rounded-xl transition-all shadow-sm flex items-center justify-center"
-                            title="Download/Open"
+                            className="bg-white hover:bg-blue-600 hover:text-white text-blue-600 border border-blue-100 p-2 rounded-xl transition-all shadow-sm flex items-center justify-center"
+                            title="View"
                           >
                             <ExternalLink className="w-4 h-4" />
+                          </a>
+                          {/* Download button - forces file download */}
+                          <a
+                            href={getDownloadUrl(res.url, res.name)}
+                            target="_blank"
+                            rel="noreferrer"
+                            download={res.resourceType !== 'link' ? (res.name || 'download') : undefined}
+                            className="bg-white hover:bg-purple-600 hover:text-white text-purple-600 border border-purple-100 p-2 rounded-xl transition-all shadow-sm flex items-center justify-center"
+                            title="Download"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                           </a>
                           {isMentor && (
                             <button
