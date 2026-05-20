@@ -17,12 +17,15 @@ const upload = multer({
 
 const uploadToCloudinary = (file) => {
   return new Promise((resolve, reject) => {
-    let resource_type = 'auto';
+    let resource_type = 'raw'; // Default: PDFs, docs, etc. must be 'raw'
+    
     if (file.mimetype.startsWith('video/')) {
       resource_type = 'video';
     } else if (file.mimetype.startsWith('image/')) {
       resource_type = 'image';
     }
+    // PDFs, Word docs, Excel, PPT, ZIP, etc. → 'raw'
+    // This gives a proper /raw/upload/ URL that browsers can download
 
     const uploadStream = cloudinary.uploader.upload_stream(
       {
