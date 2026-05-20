@@ -169,7 +169,7 @@ const StudentAnalytics = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-400 italic">No strong areas identified yet (Score > 70%).</p>
+                  <p className="text-xs text-gray-400 italic">No strong areas identified yet (Score &gt; 70%).</p>
                 )}
               </div>
 
