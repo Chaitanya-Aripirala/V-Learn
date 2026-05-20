@@ -30,6 +30,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import doubtRoutes from './routes/doubtRoutes.js';
 import libraryRoutes from './routes/libraryRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 // Mount routers
 app.use('/api/auth', authRoutes);
@@ -44,6 +45,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/doubts', doubtRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'V-Learn Backend Server is running successfully!' });
