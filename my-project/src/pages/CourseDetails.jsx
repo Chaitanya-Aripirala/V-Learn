@@ -58,10 +58,11 @@ const CourseDetails = () => {
 
   const getDownloadUrl = (url, name) => {
     if (!url) return '#';
-    // For any Cloudinary URL (image OR raw type), add fl_attachment to force browser download
+    // For any Cloudinary URL, add fl_attachment with filename to force proper download with correct extension
     if (url.includes('res.cloudinary.com')) {
-      // Insert fl_attachment after /upload/
-      return url.replace('/upload/', '/upload/fl_attachment/');
+      // Sanitize filename for Cloudinary fl_attachment (no spaces, special chars)
+      const safeFilename = (name || 'download').replace(/[^a-zA-Z0-9._-]/g, '_');
+      return url.replace('/upload/', `/upload/fl_attachment:${safeFilename}/`);
     }
     return url;
   };
@@ -222,10 +223,11 @@ const CourseDetails = () => {
       });
       
       const url = res.data.url;
+      const originalName = res.data.originalName || file.name;
       setNewResourceLink(url);
       
-      // Auto-detect type and default name
-      const fileName = file.name;
+      // Auto-detect type and default name from original filename
+      const fileName = originalName;
       setNewResourceName(fileName.split('.').slice(0, -1).join('.') || fileName);
       
       const ext = fileName.split('.').pop().toLowerCase();
@@ -238,7 +240,7 @@ const CourseDetails = () => {
       } else {
         setNewResourceType('other');
       }
-      alert('File uploaded successfully! Click "Publish to Course" to finish.');
+      alert('File uploaded! Click "Publish to Course" to save.');
     } catch (error) {
       alert('File upload failed.');
     } finally {

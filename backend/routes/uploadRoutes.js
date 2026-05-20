@@ -25,12 +25,14 @@ const uploadToCloudinary = (file) => {
       resource_type = 'image';
     }
     // PDFs, Word docs, Excel, PPT, ZIP, etc. → 'raw'
-    // This gives a proper /raw/upload/ URL that browsers can download
 
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: 'vlearn_uploads',
         resource_type: resource_type,
+        use_filename: true,       // Keep original filename (with extension)
+        unique_filename: true,    // Add random suffix to avoid collisions
+        overwrite: false,
       },
       (error, result) => {
         if (error) return reject(error);
@@ -53,9 +55,14 @@ router.post('/', upload.single('file'), async (req, res) => {
     
     const result = await uploadToCloudinary(req.file);
     console.log('File uploaded successfully to Cloudinary:', result.secure_url);
-    res.json({ url: result.secure_url });
+    // Return both url and original filename so frontend can name downloads correctly
+    res.json({ 
+      url: result.secure_url,
+      originalName: req.file.originalname,
+    });
   } catch (error) {
     console.error('Cloudinary Upload Error:', error);
+
     res.status(500).json({ message: 'Upload failed', error: error.message });
   }
 });
