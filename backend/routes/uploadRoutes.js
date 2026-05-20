@@ -17,21 +17,28 @@ const upload = multer({
 
 const uploadToCloudinary = (file) => {
   return new Promise((resolve, reject) => {
-    let resource_type = 'raw'; // Default: PDFs, docs, etc. must be 'raw'
+    let resource_type = 'auto';
     
-    if (file.mimetype.startsWith('video/')) {
+    // Explicitly set raw for document types so Cloudinary doesn't try to parse them as images
+    if (file.originalname.match(/\.(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|txt|csv)$/i)) {
+      resource_type = 'raw';
+    } else if (file.mimetype.startsWith('video/')) {
       resource_type = 'video';
     } else if (file.mimetype.startsWith('image/')) {
       resource_type = 'image';
     }
-    // PDFs, Word docs, Excel, PPT, ZIP, etc. → 'raw'
+
+    // For streams, Cloudinary doesn't know the filename. We MUST pass it via public_id
+    // to ensure the extension is preserved, which guarantees correct Content-Type delivery.
+    const ext = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9]/g, '_');
+    const uniquePublicId = `${baseName}_${Date.now()}${ext}`;
 
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: 'vlearn_uploads',
         resource_type: resource_type,
-        use_filename: true,       // Keep original filename (with extension)
-        unique_filename: true,    // Add random suffix to avoid collisions
+        public_id: uniquePublicId, // Contains the .pdf extension
         overwrite: false,
       },
       (error, result) => {

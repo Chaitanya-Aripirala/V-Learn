@@ -2,6 +2,7 @@ import express from 'express';
 import Doubt from '../models/Doubt.js';
 import Course from '../models/Course.js';
 import User from '../models/User.js';
+import Enrollment from '../models/Enrollment.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -22,6 +23,12 @@ router.post('/', protect, async (req, res) => {
   try {
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    // Verify the student is enrolled in this course
+    const enrollment = await Enrollment.findOne({ user: req.user._id, course: courseId });
+    if (!enrollment) {
+      return res.status(403).json({ message: 'You must be enrolled in this course to ask doubts.' });
+    }
 
     const mentorToAssign = mentorId || course.mentorId;
     if (!mentorToAssign) return res.status(400).json({ message: 'Mentor must be assigned to the course.' });

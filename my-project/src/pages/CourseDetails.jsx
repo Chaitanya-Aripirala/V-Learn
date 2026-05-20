@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { Video, BookOpen, Radio, Calendar, CheckCircle, MessageSquare, Users, Clock, ClipboardList, Trophy, Award, HelpCircle, X, Sparkles, ExternalLink, Coffee, FileText, File, Image as ImageIcon, Link as LinkIcon, UploadCloud, Trash2 } from 'lucide-react';
+import { Video, BookOpen, Radio, Calendar, CheckCircle, MessageSquare, Users, Clock, ClipboardList, Trophy, Award, HelpCircle, X, Sparkles, ExternalLink, Coffee, FileText, File, Image as ImageIcon, Link as LinkIcon, UploadCloud, Trash2, Send } from 'lucide-react';
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -24,6 +24,7 @@ const CourseDetails = () => {
   const [scoreInput, setScoreInput] = useState({}); // {examId: score}
   const [studentDoubts, setStudentDoubts] = useState([]);
   const [loadingDoubts, setLoadingDoubts] = useState(false);
+  const [isSendingReply, setIsSendingReply] = useState(false);
   
   // Stuff for replies
   const [replyingTo, setReplyingTo] = useState(null); 
@@ -58,9 +59,12 @@ const CourseDetails = () => {
 
   const getDownloadUrl = (url, name) => {
     if (!url) return '#';
-    // For any Cloudinary URL, add fl_attachment with filename to force proper download with correct extension
+    // Cloudinary does not support transformations on 'raw' files (like PDFs uploaded previously)
+    if (url.includes('/raw/upload/')) {
+      return url;
+    }
+    // For images/videos, add fl_attachment to force download
     if (url.includes('res.cloudinary.com')) {
-      // Sanitize filename for Cloudinary fl_attachment (no spaces, special chars)
       const safeFilename = (name || 'download').replace(/[^a-zA-Z0-9._-]/g, '_');
       return url.replace('/upload/', `/upload/fl_attachment:${safeFilename}/`);
     }
@@ -107,12 +111,14 @@ const CourseDetails = () => {
       alert('Your doubt has been sent to the mentor! You will receive a response soon.');
       setDoubtQuestion('');
       setShowDoubtModal(false);
+      fetchStudentDoubts();
     } catch (error) {
       alert('Failed to send doubt');
     } finally {
       setIsSendingDoubt(false);
     }
   };
+
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -604,6 +610,225 @@ const CourseDetails = () => {
 
       </div>
 
+      {/* ── Interact with Mentor (enrolled students only) ── */}
+      {isEnrolled && (
+        <div className="mt-10 px-0">
+          {/* CTA Banner */}
+          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 rounded-3xl p-8 relative overflow-hidden mb-8">
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 10% 50%, #fff 1px, transparent 1px), radial-gradient(circle at 90% 50%, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div>
+                <h2 className="text-2xl font-black text-white">Interact with Your Mentor</h2>
+                <p className="text-indigo-200 text-sm mt-1 font-medium">Get personal help — ask questions or book a 1-on-1 live session.</p>
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                <button
+                  id="ask-doubt-btn"
+                  onClick={() => setShowDoubtModal(true)}
+                  className="bg-white text-indigo-700 font-black px-6 py-3 rounded-2xl hover:bg-indigo-50 transition-all shadow-lg flex items-center gap-2 active:scale-95"
+                >
+                  <HelpCircle className="w-5 h-5" /> Ask a Doubt
+                </button>
+                <button
+                  id="book-session-btn"
+                  onClick={() => setShowBookingModal(true)}
+                  className="bg-indigo-800/60 border border-white/20 backdrop-blur-sm text-white font-black px-6 py-3 rounded-2xl hover:bg-indigo-800 transition-all shadow-lg flex items-center gap-2 active:scale-95"
+                >
+                  <Calendar className="w-5 h-5" /> Book 1-on-1 Session
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Student Doubt History */}
+          <div className="bg-white border border-gray-100 rounded-3xl shadow-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-violet-600" /> My Doubts for This Course
+              </h3>
+              <button
+                onClick={fetchStudentDoubts}
+                className="text-xs text-gray-400 hover:text-indigo-600 font-bold flex items-center gap-1 transition-colors"
+              >
+                <CheckCircle className="w-3 h-3" /> Refresh
+              </button>
+            </div>
+
+            {loadingDoubts ? (
+              <div className="flex justify-center py-10">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+              </div>
+            ) : studentDoubts.length === 0 ? (
+              <div className="text-center py-10 bg-gray-50/50 rounded-2xl border border-dashed">
+                <HelpCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500 font-medium">No doubts submitted yet for this course.</p>
+                <p className="text-xs text-gray-400 mt-1">Click "Ask a Doubt" above to get help from your mentor.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {studentDoubts.map((doubt) => (
+                  <div key={doubt._id} className={`border rounded-2xl overflow-hidden ${doubt.status === 'answered' ? 'border-emerald-100' : 'border-amber-100'}`}>
+                    <div className={`h-1 w-full ${doubt.status === 'answered' ? 'bg-gradient-to-r from-emerald-400 to-teal-400' : 'bg-gradient-to-r from-amber-400 to-orange-400'}`} />
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border uppercase tracking-widest ${
+                          doubt.status === 'answered' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200'
+                        }`}>
+                          {doubt.status}
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-medium">
+                          {new Date(doubt.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {/* Question */}
+                      <div className="bg-gray-50 rounded-xl p-3 mb-3">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-1">Your Question</p>
+                        <p className="text-sm font-medium text-gray-800">{doubt.question}</p>
+                      </div>
+                      {/* AI tip */}
+                      {doubt.status === 'pending' && doubt.aiAnswer && (
+                        <div className="bg-purple-50 border border-purple-100 rounded-xl p-3 mb-3">
+                          <p className="text-[10px] font-black text-purple-600 uppercase tracking-wider mb-1">✨ AI Tip (while you wait)</p>
+                          <p className="text-xs text-gray-600 leading-relaxed">{doubt.aiAnswer}</p>
+                        </div>
+                      )}
+                      {/* Mentor reply */}
+                      {doubt.status === 'answered' && doubt.answer && (
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mb-1">✅ Mentor Reply</p>
+                          <p className="text-sm text-gray-800 font-medium leading-relaxed">{doubt.answer}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ASK DOUBT MODAL */}
+      {showDoubtModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setShowDoubtModal(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <HelpCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black">Ask Your Mentor</h3>
+                    <p className="text-indigo-200 text-xs font-medium">{course?.instructor}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowDoubtModal(false)} className="p-2 hover:bg-white/20 rounded-xl transition-all">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <form onSubmit={handleAskDoubt} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Your Question</label>
+                <textarea
+                  rows={5}
+                  value={doubtQuestion}
+                  onChange={(e) => setDoubtQuestion(e.target.value)}
+                  placeholder="Describe your doubt clearly. Be specific about the topic or concept you're struggling with..."
+                  className="w-full border-2 border-gray-100 bg-gray-50 rounded-2xl p-4 text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white transition-all resize-none"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+                <p className="text-xs text-indigo-700 font-medium">💡 Your mentor will receive this doubt and reply as soon as possible. You'll see the reply in the "My Doubts" section above and on the Doubts page.</p>
+              </div>
+              <button
+                type="submit"
+                disabled={isSendingDoubt || !doubtQuestion.trim()}
+                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 active:scale-95"
+              >
+                <Send className="w-4 h-4" />
+                {isSendingDoubt ? 'Sending...' : 'Send Doubt to Mentor'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* BOOK SESSION MODAL */}
+      {showBookingModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setShowBookingModal(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black">Book 1-on-1 Session</h3>
+                    <p className="text-indigo-200 text-xs font-medium">with {course?.instructor}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowBookingModal(false)} className="p-2 hover:bg-white/20 rounded-xl transition-all">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <form onSubmit={handleBooking} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Session Topic</label>
+                <input
+                  type="text"
+                  value={bookingTopic}
+                  onChange={(e) => setBookingTopic(e.target.value)}
+                  placeholder="e.g. React Hooks, Career Guidance, Project Review"
+                  className="w-full border-2 border-gray-100 bg-gray-50 rounded-2xl p-4 text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Preferred Date</label>
+                  <input
+                    type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full border-2 border-gray-100 bg-gray-50 rounded-2xl p-3 text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Preferred Time</label>
+                  <input
+                    type="time"
+                    value={bookingTime}
+                    onChange={(e) => setBookingTime(e.target.value)}
+                    className="w-full border-2 border-gray-100 bg-gray-50 rounded-2xl p-3 text-sm font-medium outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                <p className="text-xs text-blue-700 font-medium">📅 Your mentor will review this request and send you a meeting link upon approval. Check the Sessions page for updates.</p>
+              </div>
+              <button
+                type="submit"
+                disabled={sendingBooking}
+                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 active:scale-95"
+              >
+                <Video className="w-4 h-4" />
+                {sendingBooking ? 'Sending Request...' : 'Send Session Request'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Course Content & Schedule (Enrolled Only) */}
       {isEnrolled && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-10 border-t">
@@ -973,7 +1198,9 @@ const CourseDetails = () => {
                             href={getDownloadUrl(res.url, res.name)}
                             target="_blank"
                             rel="noreferrer"
-                            download={res.resourceType !== 'link' ? (res.name || 'download') : undefined}
+                            download={res.resourceType !== 'link' ? 
+                              ((res.name || 'resource').toLowerCase().includes(`.${res.resourceType}`) ? res.name : `${res.name || 'resource'}.${res.resourceType === 'document' ? 'docx' : res.resourceType}`) 
+                              : undefined}
                             className="bg-white hover:bg-purple-600 hover:text-white text-purple-600 border border-purple-100 p-2 rounded-xl transition-all shadow-sm flex items-center justify-center"
                             title="Download"
                           >

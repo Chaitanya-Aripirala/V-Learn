@@ -184,6 +184,7 @@ const Library = () => {
                           href={href} 
                           target="_blank" 
                           rel="noreferrer"
+                          download={(item.title || 'resource').toLowerCase().includes(`.${item.itemType}`) ? item.title : `${item.title || 'resource'}.${item.itemType}`}
                           className="w-full bg-purple-700 text-white py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-between hover:bg-purple-800 transition-all shadow-md truncate"
                         >
                           <span className="truncate flex-1 text-left mr-2">{item.itemType === 'pdf' ? `Open PDF ${idx + 1}` : `View Image ${idx + 1}`}</span> <Download className="w-3 h-3 flex-shrink-0" />

@@ -14,6 +14,7 @@ import MentorRegister from './pages/MentorRegister';
 import EditProfile from './pages/EditProfile';
 import Certificate from './pages/Certificate';
 import Sessions from './pages/Sessions';
+import Doubts from './pages/Doubts';
 
 import Footer from './components/Footer';
 import ChatBot from './components/ChatBot';
@@ -39,6 +40,7 @@ function App() {
             <Route path="/profile" element={<EditProfile />} />
             <Route path="/certificate/:enrollmentId" element={<Certificate />} />
             <Route path="/sessions" element={<Sessions />} />
+            <Route path="/doubts" element={<Doubts />} />
           </Routes>
         </main>
         <Footer />

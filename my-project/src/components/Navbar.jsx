@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Search, ShoppingCart, Library as LibraryIcon, Video as VideoIcon } from 'lucide-react';
+import { Search, ShoppingCart, Library as LibraryIcon, Video as VideoIcon, MessageSquare } from 'lucide-react';
 import api from '../services/api';
 
 const Navbar = () => {
@@ -155,6 +155,9 @@ const Navbar = () => {
               </Link>
               <Link to="/sessions" className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-indigo-600 transition-colors">
                 <VideoIcon className="w-4 h-4" /> Sessions
+              </Link>
+              <Link to="/doubts" className="flex items-center gap-2 text-sm font-bold text-gray-700 hover:text-violet-600 transition-colors">
+                <MessageSquare className="w-4 h-4" /> Doubts
               </Link>
               <Link to={user.role === 'mentor' ? '/mentor-dashboard' : '/my-courses'} className="text-sm font-semibold text-gray-700 hover:text-purple-700 transition-colors">
                 {user.role === 'mentor' ? 'Instructor Dashboard' : 'My Learning'}

@@ -1,28 +1,31 @@
 import 'dotenv/config.js';
 import mongoose from 'mongoose';
-import User from './models/User.js';
-import Course from './models/Course.js';
-import { connectCloudinary } from './config/cloudinary.js';
 
-const checkDB = async () => {
+const check = async () => {
   try {
-    console.log('Testing Connections...');
-    connectCloudinary();
-    
     await mongoose.connect(process.env.MONGO_URI);
-    console.log(`MongoDB Connected: ${mongoose.connection.host}`);
-    
-    const userCount = await User.countDocuments();
-    const courseCount = await Course.countDocuments();
-    console.log(`Users in Atlas DB: ${userCount}`);
-    console.log(`Courses in Atlas DB: ${courseCount}`);
-    
-    console.log('All connections verified successfully!');
-    process.exit();
+    console.log('Connected to MongoDB.');
+    const coursesCollection = mongoose.connection.db.collection('courses');
+    const courses = await coursesCollection.find({}).toArray();
+    console.log(`Found ${courses.length} courses:`);
+    courses.forEach(c => {
+      console.log(`Course Title: ${c.title}, ID: ${c._id}`);
+      console.log(`- mentorId: ${c.mentorId}`);
+      console.log(`- resources value:`, JSON.stringify(c.resources, null, 2));
+    });
+
+    const usersCollection = mongoose.connection.db.collection('users');
+    const mentors = await usersCollection.find({ role: 'mentor' }).toArray();
+    console.log(`Found ${mentors.length} mentors:`);
+    mentors.forEach(m => {
+      console.log(`Mentor Name: ${m.name}, ID: ${m._id}`);
+    });
+
+    process.exit(0);
   } catch (err) {
-    console.error('Connection verification failed:', err);
+    console.error(err);
     process.exit(1);
   }
 };
 
-checkDB();
+check();

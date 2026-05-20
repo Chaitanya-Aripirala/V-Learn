@@ -526,27 +526,7 @@ const MentorDashboard = () => {
                 <button type="button" onClick={addVideoRow} className="text-xs font-bold text-purple-600 underline">+ Add Video Row</button>
               </div>
 
-              <div className="space-y-4 pt-4 border-t">
-                <h3 className="text-sm font-bold text-blue-600 uppercase tracking-wider flex items-center gap-2"><Radio className="w-4 h-4" /> Live Classes</h3>
-                <input type="url" placeholder="Live Class Link (Zoom/Meet)" className="w-full border p-2 rounded text-sm" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} />
-              </div>
 
-              <div className="space-y-4 pt-4 border-t">
-                <h3 className="text-sm font-bold text-green-600 uppercase tracking-wider flex items-center gap-2"><Calendar className="w-4 h-4" /> Training Schedule</h3>
-                {schedule.map((item, idx) => (
-                  <div key={idx} className="space-y-2 border-b pb-4 last:border-0">
-                    <input type="text" placeholder="Topic Name" className="w-full border p-2 rounded text-sm" value={item.topic} onChange={(e) => updateScheduleField(idx, 'topic', e.target.value)} />
-                    <div className="grid grid-cols-2 gap-2">
-                      <input type="date" className="border p-2 rounded text-sm" value={item.date} onChange={(e) => updateScheduleField(idx, 'date', e.target.value)} />
-                      <input type="time" className="border p-2 rounded text-sm" value={item.time} onChange={(e) => updateScheduleField(idx, 'time', e.target.value)} />
-                    </div>
-                    {schedule.length > 1 && (
-                      <button type="button" onClick={() => removeScheduleField(idx)} className="text-xs text-red-500 underline">Remove Topic</button>
-                    )}
-                  </div>
-                ))}
-                <button type="button" onClick={addScheduleField} className="text-xs font-bold text-green-600 underline">+ Add Topic to Schedule</button>
-              </div>
 
               <button type="submit" disabled={submitting} className="w-full bg-black text-white font-bold py-3 rounded hover:bg-gray-800 disabled:opacity-50">
                 {submitting ? 'Saving...' : (editingId ? 'Update Course' : 'Create Course')}
