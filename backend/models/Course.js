@@ -46,10 +46,23 @@ const courseSchema = mongoose.Schema(
         thumbnail: String
       },
     ],
-    resources: {
-      type: String,
-      default: ''
-    },
+    resources: [
+      {
+        name: {
+          type: String,
+          required: true
+        },
+        url: {
+          type: String,
+          required: true
+        },
+        resourceType: {
+          type: String,
+          enum: ['pdf', 'image', 'link', 'document', 'other'],
+          default: 'other'
+        }
+      }
+    ],
     liveLink: {
       type: String,
       default: ''

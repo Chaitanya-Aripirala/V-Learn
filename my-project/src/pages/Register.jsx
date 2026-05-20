@@ -64,10 +64,11 @@ const Register = () => {
                 <input 
                   type="text" 
                   placeholder="Full Name" 
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm" 
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
                   value={name} 
                   onChange={e => setName(e.target.value)} 
                   required 
+                  disabled={loading}
                 />
               </div>
               <div className="relative">
@@ -75,10 +76,11 @@ const Register = () => {
                 <input 
                   type="email" 
                   placeholder="Email Address" 
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm" 
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
                   value={email} 
                   onChange={e => setEmail(e.target.value)} 
                   required 
+                  disabled={loading}
                 />
               </div>
               <div className="relative">
@@ -86,10 +88,11 @@ const Register = () => {
                 <input 
                   type="text" 
                   placeholder="Branch (e.g. CS, IT)" 
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm" 
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
                   value={branch} 
                   onChange={e => setBranch(e.target.value)} 
                   required 
+                  disabled={loading}
                 />
               </div>
               <div className="relative">
@@ -97,13 +100,14 @@ const Register = () => {
                 <input 
                   type="password" 
                   placeholder="Password" 
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm" 
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
                   value={password} 
                   onChange={e => setPassword(e.target.value)} 
                   required 
+                  disabled={loading}
                 />
               </div>
-
+ 
               <button 
                 type="submit" 
                 disabled={loading}
@@ -122,16 +126,17 @@ const Register = () => {
               <h2 className="text-3xl font-black text-gray-900">Verify Email</h2>
               <p className="text-gray-500 mt-2 text-sm">Enter the 6-digit code sent to <b>{email}</b></p>
             </div>
-
+ 
             <form onSubmit={handleVerifyOTP} className="space-y-6">
               <input 
                 type="text" 
                 placeholder="000000" 
-                className="w-full text-center text-3xl font-black tracking-[1rem] py-4 bg-gray-50 border-2 border-purple-100 rounded-xl focus:border-purple-600 outline-none transition-all"
+                className="w-full text-center text-3xl font-black tracking-[1rem] py-4 bg-gray-50 border-2 border-purple-100 rounded-xl focus:border-purple-600 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                 value={otp}
                 maxLength={6}
                 onChange={e => setOtp(e.target.value)}
                 required
+                disabled={loading}
               />
               <button 
                 type="submit" 
@@ -141,7 +146,7 @@ const Register = () => {
                 {loading ? 'Verifying...' : 'Verify & Sign In'}
               </button>
               <p className="text-center text-xs text-gray-500">
-                Didn't receive code? <button type="button" onClick={() => setIsVerifying(false)} className="text-purple-600 font-bold hover:underline">Change Email</button>
+                Didn't receive code? <button type="button" onClick={() => setIsVerifying(false)} disabled={loading} className="text-purple-600 font-bold hover:underline disabled:opacity-50">Change Email</button>
               </p>
             </form>
           </>

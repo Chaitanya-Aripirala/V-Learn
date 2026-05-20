@@ -151,27 +151,27 @@ const MentorRegister = () => {
             <form onSubmit={handleNextStep} className="space-y-5">
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="text" name="name" placeholder="Full Name" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.name} onChange={handleChange} required />
+                <input type="text" name="name" placeholder="Full Name" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.name} onChange={handleChange} required disabled={loading} />
               </div>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="email" name="email" placeholder="Email Address" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.email} onChange={handleChange} required />
+                <input type="email" name="email" placeholder="Email Address" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.email} onChange={handleChange} required disabled={loading} />
               </div>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="tel" name="mobileNumber" placeholder="Mobile Number" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.mobileNumber} onChange={handleChange} required />
+                <input type="tel" name="mobileNumber" placeholder="Mobile Number" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.mobileNumber} onChange={handleChange} required disabled={loading} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input type="password" name="password" placeholder="Password" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.password} onChange={handleChange} required />
+                  <input type="password" name="password" placeholder="Password" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.password} onChange={handleChange} required disabled={loading} />
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input type="password" name="confirmPassword" placeholder="Confirm" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.confirmPassword} onChange={handleChange} required />
+                  <input type="password" name="confirmPassword" placeholder="Confirm" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.confirmPassword} onChange={handleChange} required disabled={loading} />
                 </div>
               </div>
-              <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 group">
+              <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed">
                 Continue <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
@@ -181,25 +181,25 @@ const MentorRegister = () => {
             <form onSubmit={handleRegister} className="space-y-5">
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="text" name="bankDetails.accountHolderName" placeholder="Account Holder Name" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.bankDetails.accountHolderName} onChange={handleChange} />
+                <input type="text" name="bankDetails.accountHolderName" placeholder="Account Holder Name" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.bankDetails.accountHolderName} onChange={handleChange} disabled={loading} />
               </div>
               <div className="relative">
                 <Landmark className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="text" name="bankDetails.bankName" placeholder="Bank Name" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.bankDetails.bankName} onChange={handleChange} />
+                <input type="text" name="bankDetails.bankName" placeholder="Bank Name" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.bankDetails.bankName} onChange={handleChange} disabled={loading} />
               </div>
               <div className="relative">
                 <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="text" name="bankDetails.accountNumber" placeholder="Account Number" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.bankDetails.accountNumber} onChange={handleChange} />
+                <input type="text" name="bankDetails.accountNumber" placeholder="Account Number" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.bankDetails.accountNumber} onChange={handleChange} disabled={loading} />
               </div>
               <div className="relative">
                 <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="text" name="bankDetails.ifscCode" placeholder="IFSC Code" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" value={formData.bankDetails.ifscCode} onChange={handleChange} />
+                <input type="text" name="bankDetails.ifscCode" placeholder="IFSC Code" className="w-full pl-12 pr-4 py-4 bg-gray-50 border-0 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" value={formData.bankDetails.ifscCode} onChange={handleChange} disabled={loading} />
               </div>
               <div className="flex gap-4">
-                <button type="button" onClick={() => setStep(1)} className="flex-1 bg-gray-100 text-gray-600 font-bold py-4 rounded-2xl hover:bg-gray-200 transition-all">
+                <button type="button" onClick={() => setStep(1)} disabled={loading} className="flex-1 bg-gray-100 text-gray-600 font-bold py-4 rounded-2xl hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   Back
                 </button>
-                <button type="submit" disabled={loading} className="flex-[2] bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all disabled:opacity-50">
+                <button type="submit" disabled={loading} className="flex-[2] bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading ? 'Creating Account...' : 'Complete Signup'}
                 </button>
               </div>
@@ -214,16 +214,17 @@ const MentorRegister = () => {
                   type="text" 
                   maxLength="6" 
                   placeholder="000000" 
-                  className="w-full max-w-xs text-center text-4xl font-black tracking-[0.2em] py-4 bg-gray-50 border-2 border-dashed border-indigo-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" 
+                  className="w-full max-w-xs text-center text-4xl font-black tracking-[0.2em] py-4 bg-gray-50 border-2 border-dashed border-indigo-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" 
                   value={otpCode} 
                   onChange={(e) => setOtpCode(e.target.value)} 
                   required 
+                  disabled={loading}
                 />
               </div>
-              <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all disabled:opacity-50">
+              <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>
-              <button type="button" className="w-full text-sm font-bold text-indigo-600 hover:underline">Resend Code</button>
+              <button type="button" disabled={loading} className="w-full text-sm font-bold text-indigo-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed">Resend Code</button>
             </form>
           )}
 

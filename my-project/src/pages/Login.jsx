@@ -5,16 +5,20 @@ import { AuthContext } from '../context/AuthContext';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await login(email, password);
       navigate('/');
     } catch (error) {
       alert('Invalid credentials');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -28,10 +32,11 @@ const Login = () => {
             <input 
               type="email" 
               placeholder="Email" 
-              className="w-full border border-gray-900 p-4 font-bold rounded-sm outline-none focus:ring-1 focus:ring-black"
+              className="w-full border border-gray-900 p-4 font-bold rounded-sm outline-none focus:ring-1 focus:ring-black disabled:bg-gray-100 disabled:cursor-not-allowed"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           <div>
@@ -39,14 +44,15 @@ const Login = () => {
             <input 
               type="password" 
               placeholder="Password" 
-              className="w-full border border-gray-900 p-4 font-bold rounded-sm outline-none focus:ring-1 focus:ring-black"
+              className="w-full border border-gray-900 p-4 font-bold rounded-sm outline-none focus:ring-1 focus:ring-black disabled:bg-gray-100 disabled:cursor-not-allowed"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
-          <button type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-sm hover:bg-purple-800 transition-colors">
-            Log in
+          <button type="submit" disabled={loading} className="w-full bg-primary text-white font-bold py-4 rounded-sm hover:bg-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
         <div className="mt-6 text-center text-sm space-y-4">

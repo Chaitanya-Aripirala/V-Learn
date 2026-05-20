@@ -3,7 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import CourseCard from '../components/CourseCard';
-import { Trash2, Edit3, PlusCircle, Video, BookOpen, Radio, Calendar, X, ClipboardList, Link as LinkIcon, MessageSquare, HelpCircle, Coffee, UploadCloud, CheckCircle } from 'lucide-react';
+import { Trash2, Edit3, PlusCircle, Video, BookOpen, Radio, Calendar, X, ClipboardList, Link as LinkIcon, MessageSquare, HelpCircle, Coffee, UploadCloud, CheckCircle, FileText, File, Image as ImageIcon } from 'lucide-react';
 
 const MentorDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -20,7 +20,6 @@ const MentorDashboard = () => {
   const [category, setCategory] = useState('Development');
   const [price, setPrice] = useState('');
   const [image, setImage] = useState('');
-  const [resources, setResources] = useState('');
   const [liveLink, setLiveLink] = useState('');
   const [duration, setDuration] = useState('');
   const [accessPeriod, setAccessPeriod] = useState('');
@@ -59,7 +58,10 @@ const MentorDashboard = () => {
   // Resource Management State
   const [showResourceManager, setShowResourceManager] = useState(false);
   const [selectedCourseForResource, setSelectedCourseForResource] = useState(null);
+  const [modalResources, setModalResources] = useState([]);
+  const [newResourceName, setNewResourceName] = useState('');
   const [newResourceLink, setNewResourceLink] = useState('');
+  const [newResourceType, setNewResourceType] = useState('other');
   const [isSavingResource, setIsSavingResource] = useState(false);
 
   useEffect(() => {
@@ -113,10 +115,22 @@ const MentorDashboard = () => {
       
       const url = res.data.url;
       
-      if (fieldType === 'resources') {
-        setResources(url);
-      } else if (fieldType === 'modal-resources') {
+      if (fieldType === 'modal-resources') {
         setNewResourceLink(url);
+        // Auto-detect type and default name
+        const fileName = file.name;
+        setNewResourceName(fileName.split('.').slice(0, -1).join('.') || fileName);
+        
+        const ext = fileName.split('.').pop().toLowerCase();
+        if (ext === 'pdf') {
+          setNewResourceType('pdf');
+        } else if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)) {
+          setNewResourceType('image');
+        } else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(ext)) {
+          setNewResourceType('document');
+        } else {
+          setNewResourceType('other');
+        }
       } else if (fieldType === 'videoUrl' && index !== null) {
         updateVideoRow(index, 'url', url);
       }
@@ -248,7 +262,6 @@ const MentorDashboard = () => {
       price: Number(price),
       image,
       videos: videos.filter(v => v.url.trim() !== ''),
-      resources,
       liveLink,
       duration, 
       accessPeriod: totalDays, 
@@ -279,7 +292,6 @@ const MentorDashboard = () => {
     setCategory('Development');
     setPrice('');
     setImage('');
-    setResources('');
     setLiveLink('');
     setDuration('');
     setAccessPeriod('');
@@ -295,7 +307,6 @@ const MentorDashboard = () => {
     setCategory(course.category);
     setPrice(course.price);
     setImage(course.image);
-    setResources(course.resources || '');
     setLiveLink(course.liveLink || '');
     setDuration(course.duration || '');
     setAccessPeriod(course.accessPeriod || '');
@@ -313,8 +324,34 @@ const MentorDashboard = () => {
 
   const handleOpenResourceManager = (course) => {
     setSelectedCourseForResource(course);
-    setNewResourceLink(course.resources || '');
+    setModalResources(course.resources || []);
+    setNewResourceName('');
+    setNewResourceLink('');
+    setNewResourceType('other');
     setShowResourceManager(true);
+  };
+
+  const handleAddResource = () => {
+    if (!newResourceLink.trim()) {
+      alert('Please upload a file or paste a link first.');
+      return;
+    }
+    const nameToUse = newResourceName.trim() || 'Untitled Resource';
+    const newRes = {
+      name: nameToUse,
+      url: newResourceLink.trim(),
+      resourceType: newResourceType
+    };
+    setModalResources([...modalResources, newRes]);
+    
+    // Reset inputs
+    setNewResourceName('');
+    setNewResourceLink('');
+    setNewResourceType('other');
+  };
+
+  const handleRemoveResource = (indexToRemove) => {
+    setModalResources(modalResources.filter((_, idx) => idx !== indexToRemove));
   };
 
   const handleSaveResource = async () => {
@@ -322,13 +359,13 @@ const MentorDashboard = () => {
     setIsSavingResource(true);
     try {
       await api.put(`/courses/${selectedCourseForResource._id}`, {
-        resources: newResourceLink
+        resources: modalResources
       });
-      alert('Resource updated and published successfully!');
-      setCourses(prev => prev.map(c => c._id === selectedCourseForResource._id ? { ...c, resources: newResourceLink } : c));
+      alert('Resources updated and published successfully!');
+      setCourses(prev => prev.map(c => c._id === selectedCourseForResource._id ? { ...c, resources: modalResources } : c));
       setShowResourceManager(false);
     } catch (error) {
-      alert('Failed to save resource: ' + (error.response?.data?.message || error.message));
+      alert('Failed to save resources: ' + (error.response?.data?.message || error.message));
     } finally {
       setIsSavingResource(false);
     }
@@ -490,15 +527,7 @@ const MentorDashboard = () => {
               </div>
 
               <div className="space-y-4 pt-4 border-t">
-                <h3 className="text-sm font-bold text-blue-600 uppercase tracking-wider flex items-center gap-2"><BookOpen className="w-4 h-4" /> Resources & Live</h3>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Upload Resources (PDF/Zip)</label>
-                  <div className="flex items-center gap-2">
-                    <input type="file" className="flex-1 border p-2 rounded text-xs bg-white" onChange={(e) => handleFileUpload(e, 'resources')} disabled={uploadingFiles['resources']} />
-                    {uploadingFiles['resources'] && <span className="text-xs text-blue-600 font-bold animate-pulse flex items-center gap-1"><UploadCloud className="w-4 h-4" /> Uploading...</span>}
-                  </div>
-                  {resources && <p className="text-xs text-green-600 font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3" /> File Ready</p>}
-                </div>
+                <h3 className="text-sm font-bold text-blue-600 uppercase tracking-wider flex items-center gap-2"><Radio className="w-4 h-4" /> Live Classes</h3>
                 <input type="url" placeholder="Live Class Link (Zoom/Meet)" className="w-full border p-2 rounded text-sm" value={liveLink} onChange={(e) => setLiveLink(e.target.value)} />
               </div>
 
@@ -843,7 +872,7 @@ const MentorDashboard = () => {
         {/* Resource Manager Overlay */}
         {showResourceManager && selectedCourseForResource && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="bg-white rounded-3xl w-full max-w-xl overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh]">
               <div className="p-6 border-b flex items-center justify-between bg-blue-600 text-white">
                 <div>
                   <h2 className="text-xl font-black flex items-center gap-2">
@@ -856,85 +885,140 @@ const MentorDashboard = () => {
                 </button>
               </div>
               
-              <div className="p-6 space-y-6">
-                {/* Current Resource */}
-                {selectedCourseForResource.resources ? (
-                  <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-blue-100 p-2.5 rounded-xl text-blue-600">
-                        <BookOpen className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-black text-blue-600 uppercase tracking-widest">Active Study Resource</p>
-                        <p className="text-sm font-bold text-gray-800 truncate max-w-[200px]">
-                          {selectedCourseForResource.resources.split('/').pop()}
-                        </p>
+              <div className="p-6 overflow-y-auto space-y-6 flex-1">
+                {/* Current Resources List */}
+                <div>
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Course Resources ({modalResources.length})</h3>
+                  {modalResources.length > 0 ? (
+                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                      {modalResources.map((res, idx) => (
+                        <div key={idx} className="bg-gray-50 border border-gray-100 p-3.5 rounded-2xl flex items-center justify-between gap-3 group">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="bg-blue-50 text-blue-600 p-2 rounded-xl flex-shrink-0">
+                              {res.resourceType === 'pdf' ? (
+                                <FileText className="w-5 h-5" />
+                              ) : res.resourceType === 'image' ? (
+                                <ImageIcon className="w-5 h-5" />
+                              ) : res.resourceType === 'link' ? (
+                                <LinkIcon className="w-5 h-5" />
+                              ) : res.resourceType === 'document' ? (
+                                <File className="w-5 h-5" />
+                              ) : (
+                                <FileText className="w-5 h-5" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-bold text-gray-800 truncate">{res.name}</p>
+                              <a href={res.url} target="_blank" rel="noreferrer" className="text-[10px] text-blue-600 hover:underline font-bold truncate block">
+                                {res.url}
+                              </a>
+                            </div>
+                          </div>
+                          <button 
+                            type="button" 
+                            onClick={() => handleRemoveResource(idx)} 
+                            className="text-red-500 hover:bg-red-50 p-2 rounded-xl transition-all"
+                            title="Remove resource"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border border-dashed border-gray-200 p-6 rounded-2xl text-center text-gray-400">
+                      <BookOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm font-bold">No resources uploaded yet</p>
+                      <p className="text-xs mt-1 text-gray-400">Add resources using the form below to publish them for students.</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Add New Resource Form */}
+                <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-2xl space-y-4">
+                  <h4 className="text-xs font-black text-blue-700 uppercase tracking-widest">Add New Resource</h4>
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-gray-500 uppercase">Resource Name / Display Title</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Lecture Notes PDF, Syllabus Sheet" 
+                      className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:border-blue-500 focus:bg-white outline-none transition-all"
+                      value={newResourceName}
+                      onChange={e => setNewResourceName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase">Resource Type</label>
+                      <select 
+                        className="w-full border border-gray-200 p-3 rounded-xl text-sm bg-white outline-none focus:border-blue-500"
+                        value={newResourceType}
+                        onChange={e => setNewResourceType(e.target.value)}
+                      >
+                        <option value="pdf">PDF Document</option>
+                        <option value="image">Image Asset</option>
+                        <option value="link">Web Link</option>
+                        <option value="document">Office Document</option>
+                        <option value="other">Other File</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase">Upload File</label>
+                      <div className="relative">
+                        <input 
+                          type="file" 
+                          className="w-full border border-gray-200 p-2 rounded-xl text-xs bg-white focus:bg-white outline-none cursor-pointer"
+                          onChange={(e) => handleFileUpload(e, 'modal-resources')} 
+                          disabled={uploadingFiles['modal-resources']} 
+                        />
+                        {uploadingFiles['modal-resources'] && (
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-blue-600 font-bold animate-pulse">
+                            Uploading...
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <a 
-                      href={selectedCourseForResource.resources} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      className="bg-white hover:bg-gray-50 border text-gray-700 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
-                    >
-                      View / Test
-                    </a>
-                  </div>
-                ) : (
-                  <div className="border border-dashed border-gray-200 p-6 rounded-2xl text-center text-gray-400">
-                    <BookOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm font-bold">No resources uploaded yet</p>
-                    <p className="text-xs mt-1 text-gray-400">Upload a resource below so enrolled students can access it.</p>
-                  </div>
-                )}
-
-                {/* Upload Section */}
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Upload Resource File (PDF, Zip, doc, etc.)</label>
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="file" 
-                        className="flex-1 border-2 border-gray-100 p-3 rounded-2xl text-xs bg-gray-50 focus:bg-white focus:border-blue-500 outline-none transition-all"
-                        onChange={(e) => handleFileUpload(e, 'modal-resources')} 
-                        disabled={uploadingFiles['modal-resources']} 
-                      />
-                      {uploadingFiles['modal-resources'] && (
-                        <span className="text-xs text-blue-600 font-bold animate-pulse flex items-center gap-1">
-                          <UploadCloud className="w-4 h-4" /> Uploading...
-                        </span>
-                      )}
-                    </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Or Paste Resource URL</label>
+                    <label className="text-[10px] font-bold text-gray-500 uppercase">Or Paste Link/URL</label>
                     <input 
                       type="url" 
                       placeholder="e.g. https://drive.google.com/..." 
-                      className="w-full border-2 border-gray-100 p-4 rounded-2xl text-sm focus:border-blue-500 focus:bg-white outline-none transition-all bg-gray-50 text-gray-800 font-semibold"
+                      className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:border-blue-500 focus:bg-white outline-none transition-all text-gray-800"
                       value={newResourceLink} 
                       onChange={e => setNewResourceLink(e.target.value)} 
                     />
                   </div>
-                </div>
 
-                <div className="flex gap-3 pt-4 border-t">
                   <button 
-                    onClick={handleSaveResource}
-                    disabled={isSavingResource}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl text-sm transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2"
+                    type="button"
+                    onClick={handleAddResource}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1 shadow-md shadow-blue-100"
                   >
-                    {isSavingResource ? 'Saving...' : 'Save & Publish'}
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setShowResourceManager(false)} 
-                    className="px-6 border-2 border-gray-100 hover:bg-gray-50 text-gray-500 font-bold rounded-2xl text-sm transition-all"
-                  >
-                    Close
+                    <PlusCircle className="w-4 h-4" /> Add to Resources List
                   </button>
                 </div>
+              </div>
+
+              {/* Modal Action Buttons */}
+              <div className="p-6 border-t bg-gray-50 flex gap-3">
+                <button 
+                  onClick={handleSaveResource}
+                  disabled={isSavingResource}
+                  className="flex-1 bg-black hover:bg-gray-800 text-white font-black py-3.5 rounded-2xl text-sm transition-all flex items-center justify-center gap-2"
+                >
+                  {isSavingResource ? 'Saving...' : 'Save & Publish Resources'}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowResourceManager(false)} 
+                  className="px-6 border border-gray-200 hover:bg-gray-100 text-gray-700 font-bold rounded-2xl text-sm transition-all"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>

@@ -134,15 +134,19 @@ router.route('/:id')
   .put(protect, async (req, res) => {
     try {
       const course = await Course.findById(req.params.id);
-      if (course) {
-        if (course.mentorId.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Not authorized' });
-        Object.assign(course, req.body);
-        const updatedCourse = await course.save();
-        res.json(updatedCourse);
-      } else {
-        res.status(404).json({ message: 'Course not found' });
-      }
+      if (!course) return res.status(404).json({ message: 'Course not found' });
+      if (course.mentorId.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Not authorized' });
+
+      // Use $set with findByIdAndUpdate to safely update nested array fields
+      // without Mongoose's type-casting validation interfering with subdocument arrays
+      const updatedCourse = await Course.findByIdAndUpdate(
+        req.params.id,
+        { $set: req.body },
+        { returnDocument: 'after' }
+      );
+      res.json(updatedCourse);
     } catch (error) {
+      console.error('Course Update Error:', error.message);
       res.status(500).json({ message: error.message });
     }
   })
