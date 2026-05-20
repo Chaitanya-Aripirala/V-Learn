@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+const isDev = import.meta.env.MODE === 'development';
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://v-learn-5n7j.onrender.com/api',
+  baseURL: isDev ? 'http://localhost:5000/api' : 'https://v-learn-5n7j.onrender.com/api',
 });
 
 // Add a request interceptor
