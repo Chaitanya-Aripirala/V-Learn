@@ -74,7 +74,7 @@ const CourseCard = ({ course }) => {
               ) : (
                 <button 
                   onClick={handleAddToCart}
-                  className="text-xs font-bold bg-[#00041a] text-white px-5 py-2.5 rounded-xl hover:bg-[#7e22ce] transition-colors shadow-md transform hover:scale-105 active:scale-95"
+                  className="text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl hover:from-[#7e22ce] hover:to-indigo-500 transition-all shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
                 >
                   Add to Cart
                 </button>

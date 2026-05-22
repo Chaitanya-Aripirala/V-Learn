@@ -1,9 +1,71 @@
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 import sendEmail from '../utils/sendEmail.js';
 import { otpTemplate, welcomeTemplate, resetPasswordTemplate } from '../utils/emailTemplates.js';
 
-// @desc    Register a new mentor (instantly verified, no OTP)
+// @desc    Google Authentication
+// @route   POST /api/auth/google
+// @access  Public
+export const googleAuth = async (req, res) => {
+  const { credential, role, mobileNumber, branch } = req.body;
+
+  try {
+    let email, name, picture;
+
+    if (!process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+      // Decode without verification if no real Client ID is provided
+      const payload = JSON.parse(Buffer.from(credential.split('.')[1], 'base64').toString());
+      email = payload.email;
+      name = payload.name;
+      picture = payload.picture;
+    } else {
+      // Verify token securely with Google Auth Library
+      const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      email = payload.email;
+      name = payload.name;
+      picture = payload.picture;
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user if they don't exist
+      user = await User.create({
+        name,
+        email,
+        password: Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8), // random secure password
+        role: role || 'user',
+        mobileNumber: mobileNumber || '',
+        branch: branch || '',
+        profilePic: picture || '',
+        isVerified: true, // Google users are pre-verified
+      });
+    }
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      branch: user.branch,
+      mobileNumber: user.mobileNumber,
+      bankDetails: user.bankDetails,
+      profilePic: user.profilePic,
+      enrolledCourses: user.enrolledCourses,
+      cart: user.cart,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    console.error('Google Auth Error:', error);
+    res.status(500).json({ message: 'Google authentication failed. Check your client ID.' });
+  }
+};
 // @route   POST /api/auth/mentor/register
 // @access  Public
 export const registerMentor = async (req, res) => {

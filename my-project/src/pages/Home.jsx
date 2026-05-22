@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import CourseCard from '../components/CourseCard';
 import { AuthContext } from '../context/AuthContext';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { useContext } from 'react';
 
 const Home = () => {
@@ -86,31 +86,31 @@ const Home = () => {
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Extreme Hero Section for Students/Visitors */}
       {(!user || user.role !== 'mentor') && !category && !searchKeyword && (
-        <div className="relative bg-[#00041a] text-white overflow-hidden mb-12">
+        <div className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 text-gray-900 overflow-hidden mb-12 shadow-sm border-b border-purple-100/50">
           {/* Animated Background Elements */}
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#7e22ce] rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob"></div>
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob animation-delay-4000"></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob"></div>
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-[128px] opacity-50 animate-blob animation-delay-4000"></div>
 
           <div className="relative max-w-7xl mx-auto px-6 py-24 md:py-32 flex flex-col items-center text-center z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 animate-fade-in-up">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span className="text-sm font-semibold tracking-wide text-purple-200 uppercase">Welcome to the future of learning</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 border border-purple-100 backdrop-blur-md mb-8 animate-fade-in-up shadow-sm">
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span className="text-sm font-bold tracking-wide text-purple-700 uppercase">Welcome to the future of learning</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 animate-fade-in-up animation-delay-100">
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-8 animate-fade-in-up animation-delay-100 text-gray-900">
               Master your craft with <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-[#7e22ce] to-indigo-400">V-Learn</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600">V-Learn</span>
             </h1>
-            <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up animation-delay-200">
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up animation-delay-200 font-medium">
               Unlock your potential with world-class courses designed by industry experts. Learn at your own pace, anytime, anywhere.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up animation-delay-300">
-              <button onClick={() => window.scrollTo({top: 600, behavior: 'smooth'})} className="bg-[#7e22ce] hover:bg-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-[0_0_40px_-10px_rgba(126,34,206,0.8)] hover:shadow-[0_0_60px_-15px_rgba(126,34,206,1)] transition-all transform hover:-translate-y-1">
-                Explore Courses
+              <button onClick={() => window.scrollTo({top: 600, behavior: 'smooth'})} className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl shadow-purple-200 transition-all transform hover:-translate-y-1 group">
+                <span className="relative z-10 flex items-center gap-2">Explore Courses <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" /></span>
               </button>
               {!user && (
-                <button onClick={() => navigate('/register')} className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1">
-                  Join for Free
+                <button onClick={() => navigate('/register')} className="bg-white hover:bg-gray-50 border border-purple-100 text-gray-900 px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 group shadow-sm">
+                  Join for Free <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-purple-600" />
                 </button>
               )}
             </div>
@@ -235,22 +235,22 @@ const Home = () => {
 
         {/* Become a Mentor CTA */}
         {(!user || user.role !== 'mentor') && !category && !searchKeyword && (
-          <div className="my-20 rounded-3xl bg-[#00041a] text-white p-12 md:p-16 text-center relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 w-64 h-64 bg-[#7e22ce] rounded-full blur-[100px] opacity-30"></div>
-            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-indigo-700 rounded-full blur-[100px] opacity-30"></div>
+          <div className="my-20 rounded-3xl bg-gradient-to-br from-indigo-50 via-white to-purple-50 border border-purple-100 p-12 md:p-16 text-center relative overflow-hidden shadow-xl shadow-purple-50">
+            <div className="absolute -top-10 -right-10 w-64 h-64 bg-purple-300 rounded-full blur-[100px] opacity-30"></div>
+            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-indigo-300 rounded-full blur-[100px] opacity-30"></div>
             <div className="relative z-10">
-              <p className="text-purple-400 font-bold text-sm uppercase tracking-[0.3em] mb-4">Share Your Knowledge</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-                Become a <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">V-Learn</span> Mentor
+              <p className="text-purple-600 font-black text-sm uppercase tracking-[0.3em] mb-4">Share Your Knowledge</p>
+              <h2 className="text-4xl md:text-5xl font-black mb-6 leading-tight text-gray-900">
+                Become a <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">V-Learn</span> Mentor
               </h2>
-              <p className="text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed text-lg">
+              <p className="text-gray-600 font-medium max-w-xl mx-auto mb-10 leading-relaxed text-lg">
                 Join hundreds of expert instructors and reach thousands of students. Build your brand and earn while you teach.
               </p>
               <button
                 onClick={() => navigate('/mentor-register')}
-                className="bg-[#7e22ce] hover:bg-purple-600 text-white px-10 py-4 rounded-xl font-bold text-lg shadow-[0_0_40px_-10px_rgba(126,34,206,0.8)] hover:shadow-[0_0_60px_-15px_rgba(126,34,206,1)] transition-all transform hover:-translate-y-1"
+                className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-10 py-4 rounded-xl font-bold text-lg shadow-xl shadow-purple-200 transition-all transform hover:-translate-y-1 group"
               >
-                Start Teaching Today →
+                <span className="relative z-10 flex items-center gap-2">Start Teaching Today <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></span>
               </button>
             </div>
           </div>

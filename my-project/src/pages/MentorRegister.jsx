@@ -48,6 +48,9 @@ const MentorRegister = () => {
       if (!formData.name || !formData.email || !formData.mobileNumber || !formData.password || !formData.confirmPassword) {
         return setError('Please fill all required fields');
       }
+      if (formData.mobileNumber.length < 10) {
+        return setError('Mobile number must be at least 10 digits');
+      }
       if (formData.password !== formData.confirmPassword) {
         return setError('Passwords do not match');
       }
@@ -87,8 +90,11 @@ const MentorRegister = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 via-white to-purple-50 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-48 h-48 bg-purple-100 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/2"></div>
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-100 rounded-full blur-3xl -z-10 translate-y-1/2 -translate-x-1/2"></div>
+      
+      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-3xl shadow-2xl shadow-purple-100/50 overflow-hidden border border-purple-50 relative z-10">
         
         {/* Left Side: Branding/Info */}
         <div className="bg-gradient-to-br from-indigo-700 to-purple-800 p-12 text-white flex flex-col justify-between">

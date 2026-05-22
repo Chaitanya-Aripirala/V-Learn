@@ -44,49 +44,80 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="bg-white shadow-xl shadow-gray-100 rounded-2xl p-8 border border-gray-100">
-        {/* Profile Header */}
-        <div className="flex flex-col md:flex-row items-center gap-6 mb-12 border-b border-gray-100 pb-10">
-          <div className="w-24 h-24 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-full flex items-center justify-center text-4xl font-bold shadow-lg shadow-purple-200">
-            {user.profilePic ? (
-              <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover rounded-full" />
-            ) : (
-              user.name.charAt(0).toUpperCase()
-            )}
-          </div>
-          <div className="text-center md:text-left flex-1">
-            <h1 className="text-3xl font-black text-gray-900">{user.name}</h1>
-            <p className="text-gray-500 font-medium">{user.email}</p>
-            <div className="flex justify-center md:justify-start gap-2 mt-2">
-              <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">{user.role}</span>
-              {user.isVerified && <span className="bg-green-100 text-green-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Verified</span>}
+      <div className="bg-white shadow-2xl shadow-purple-50 rounded-3xl overflow-hidden border border-gray-100">
+        {/* Profile Header Banner */}
+        <div className="relative bg-gradient-to-r from-purple-900 via-indigo-800 to-blue-900 px-8 py-16 text-white overflow-hidden">
+          {/* Decorative background blobs */}
+          <div className="absolute top-0 left-0 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/30 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            <div className="relative group">
+              <div className="w-32 h-32 bg-white/10 p-1 rounded-full backdrop-blur-sm border border-white/20 shadow-2xl">
+                <div className="w-full h-full bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-5xl font-black overflow-hidden shadow-inner">
+                  {user.profilePic ? (
+                    <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    user.name.charAt(0).toUpperCase()
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-4">
-            <Link to="/profile" className="px-6 py-2 border border-gray-200 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all">Edit Profile</Link>
+            
+            <div className="text-center md:text-left flex-1">
+              <h1 className="text-4xl font-black mb-2 tracking-tight">{user.name}</h1>
+              <p className="text-indigo-200 font-medium text-lg flex items-center justify-center md:justify-start gap-2">
+                {user.email}
+              </p>
+              <div className="flex justify-center md:justify-start gap-3 mt-4">
+                <span className="bg-white/20 backdrop-blur-md text-white text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-wider border border-white/10 shadow-sm">
+                  {user.role}
+                </span>
+                {user.isVerified && (
+                  <span className="bg-emerald-500/20 backdrop-blur-md text-emerald-300 border border-emerald-500/20 text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+                    Verified Account
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-4 mt-6 md:mt-0">
+              <Link to="/profile" className="px-8 py-3 bg-white text-indigo-900 rounded-xl text-sm font-black hover:bg-gray-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                Edit Profile
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-purple-600" /> Your Statistics
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="border border-purple-100 p-8 rounded-2xl text-center bg-purple-50/50 transition-all hover:shadow-md">
-              <div className="text-5xl font-black text-purple-700 mb-2">{user.enrolledCourses?.length || 0}</div>
-              <div className="text-gray-500 font-bold uppercase text-xs tracking-widest">Enrolled Courses</div>
-            </div>
-            <div className="border border-blue-100 p-8 rounded-2xl text-center bg-blue-50/50 transition-all hover:shadow-md">
-              <div className="text-5xl font-black text-blue-700 mb-2">{payments.length}</div>
-              <div className="text-gray-500 font-bold uppercase text-xs tracking-widest">Total Purchases</div>
-            </div>
-            <div className="border border-green-100 p-8 rounded-2xl text-center bg-green-50/50 transition-all hover:shadow-md">
-              <div className="text-5xl font-black text-green-700 mb-2">{certificates.length}</div>
-              <div className="text-gray-500 font-bold uppercase text-xs tracking-widest">Earned Certificates</div>
+        <div className="p-8">
+          {/* Statistics Cards */}
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold mb-8 flex items-center gap-3 text-gray-900">
+              <TrendingUp className="w-7 h-7 text-purple-600 p-1 bg-purple-100 rounded-lg" /> Your Statistics
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="relative overflow-hidden border-0 p-8 rounded-3xl bg-gradient-to-br from-purple-50 to-indigo-50 shadow-sm hover:shadow-md transition-all group">
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-200/50 rounded-full blur-2xl group-hover:bg-purple-300/50 transition-colors"></div>
+                <div className="relative z-10">
+                  <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-2">{user.enrolledCourses?.length || 0}</div>
+                  <div className="text-gray-500 font-bold uppercase text-xs tracking-widest">Enrolled Courses</div>
+                </div>
+              </div>
+              <div className="relative overflow-hidden border-0 p-8 rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 shadow-sm hover:shadow-md transition-all group">
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-200/50 rounded-full blur-2xl group-hover:bg-blue-300/50 transition-colors"></div>
+                <div className="relative z-10">
+                  <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600 mb-2">{payments.length}</div>
+                  <div className="text-gray-500 font-bold uppercase text-xs tracking-widest">Total Purchases</div>
+                </div>
+              </div>
+              <div className="relative overflow-hidden border-0 p-8 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 shadow-sm hover:shadow-md transition-all group">
+                <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-200/50 rounded-full blur-2xl group-hover:bg-emerald-300/50 transition-colors"></div>
+                <div className="relative z-10">
+                  <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600 mb-2">{certificates.length}</div>
+                  <div className="text-gray-500 font-bold uppercase text-xs tracking-widest">Earned Certificates</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
         {/* Analysis Section */}
         <div className="mb-16">
@@ -237,6 +268,7 @@ const Dashboard = () => {
               </tbody>
             </table>
           </div>
+        </div>
         </div>
       </div>
     </div>

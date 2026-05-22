@@ -49,8 +49,11 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 via-white to-purple-50 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-100 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/2"></div>
+      <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-100 rounded-full blur-3xl -z-10 translate-y-1/2 -translate-x-1/2"></div>
+      
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl shadow-purple-100/50 p-8 border border-purple-50 relative z-10">
         {!isVerifying ? (
           <>
             <div className="text-center mb-10">
@@ -111,7 +114,7 @@ const Register = () => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-all shadow-lg shadow-purple-100 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-200 disabled:opacity-50 hover:-translate-y-0.5"
               >
                 {loading ? 'Creating Account...' : 'Sign Up'}
               </button>

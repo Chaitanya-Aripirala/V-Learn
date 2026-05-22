@@ -431,25 +431,38 @@ const MentorDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="flex items-center justify-between mb-10 border-b pb-6">
-        <h1 className="text-3xl font-bold">Mentor Dashboard</h1>
-        {editingId && (
-          <button onClick={resetForm} className="bg-gray-100 px-4 py-2 rounded text-sm font-bold">Cancel Edit</button>
-        )}
+      <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 to-indigo-900 rounded-3xl p-10 mb-10 text-white shadow-2xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-black mb-2 tracking-tight">Mentor Dashboard</h1>
+            <p className="text-indigo-200 font-medium text-lg">Manage your courses, students, and earnings from one central hub.</p>
+          </div>
+          {editingId && (
+            <button onClick={resetForm} className="bg-white/10 hover:bg-white/20 backdrop-blur-md px-6 py-3 rounded-xl text-sm font-bold border border-white/20 transition-all shadow-lg flex items-center gap-2">
+              <X className="w-4 h-4" /> Cancel Edit
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div className="bg-purple-600 text-white p-8 rounded-2xl shadow-lg shadow-purple-100">
-          <p className="text-purple-100 text-sm font-bold uppercase tracking-wider mb-2">Total Revenue</p>
-          <h3 className="text-4xl font-black">₹{earnings.totalRevenue}</h3>
+        <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 to-indigo-700 text-white p-8 rounded-3xl shadow-xl shadow-purple-200 hover:-translate-y-1 transition-transform group">
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors"></div>
+          <p className="text-purple-100 text-sm font-bold uppercase tracking-widest mb-3 relative z-10">Total Revenue</p>
+          <h3 className="text-5xl font-black relative z-10 tracking-tight">₹{earnings.totalRevenue}</h3>
         </div>
-        <div className="bg-blue-600 text-white p-8 rounded-2xl shadow-lg shadow-blue-100">
-          <p className="text-blue-100 text-sm font-bold uppercase tracking-wider mb-2">Total Enrollments</p>
-          <h3 className="text-4xl font-black">{earnings.totalEnrollments}</h3>
+        <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-cyan-600 text-white p-8 rounded-3xl shadow-xl shadow-blue-200 hover:-translate-y-1 transition-transform group">
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors"></div>
+          <p className="text-blue-100 text-sm font-bold uppercase tracking-widest mb-3 relative z-10">Total Enrollments</p>
+          <h3 className="text-5xl font-black relative z-10 tracking-tight">{earnings.totalEnrollments}</h3>
         </div>
-        <div className="bg-gray-900 text-white p-8 rounded-2xl shadow-lg shadow-gray-200">
-          <p className="text-gray-400 text-sm font-bold uppercase tracking-wider mb-2">Active Courses</p>
-          <h3 className="text-4xl font-black">{courses.length}</h3>
+        <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-3xl shadow-xl shadow-gray-300 hover:-translate-y-1 transition-transform group">
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors"></div>
+          <p className="text-gray-400 text-sm font-bold uppercase tracking-widest mb-3 relative z-10">Active Courses</p>
+          <h3 className="text-5xl font-black relative z-10 tracking-tight">{courses.length}</h3>
         </div>
       </div>
 
