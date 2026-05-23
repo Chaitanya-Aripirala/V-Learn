@@ -541,9 +541,14 @@ const MentorDashboard = () => {
 
 
 
-              <button type="submit" disabled={submitting} className="w-full bg-black text-white font-bold py-3 rounded hover:bg-gray-800 disabled:opacity-50">
-                {submitting ? 'Saving...' : (editingId ? 'Update Course' : 'Create Course')}
-              </button>
+              {(() => {
+                const isAnyFileUploading = Object.values(uploadingFiles).some(status => status === true);
+                return (
+                  <button type="submit" disabled={submitting || isAnyFileUploading} className="w-full bg-black text-white font-bold py-3 rounded hover:bg-gray-800 disabled:opacity-50">
+                    {submitting ? 'Saving...' : isAnyFileUploading ? 'Uploading Files...' : (editingId ? 'Update Course' : 'Create Course')}
+                  </button>
+                );
+              })()}
             </form>
           </div>
         </div>

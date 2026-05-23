@@ -8,16 +8,24 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [branch, setBranch] = useState('');
   const [otp, setOtp] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setError('');
+    
+    if (password !== confirmPassword) {
+      return setError('Passwords do not match');
+    }
+
     setLoading(true);
     try {
       const res = await api.post('/auth/register', { name, email, password, branch });
@@ -25,8 +33,8 @@ const Register = () => {
       localStorage.setItem('user', JSON.stringify(res.data));
       alert('Registration successful!');
       navigate('/');
-    } catch (error) {
-      alert(error.response?.data?.message || 'Error registering');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error registering');
     } finally {
       setLoading(false);
     }
@@ -41,8 +49,8 @@ const Register = () => {
       localStorage.setItem('user', JSON.stringify(res.data));
       alert('Verification successful!');
       navigate('/');
-    } catch (error) {
-      alert(error.response?.data?.message || 'Invalid OTP');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid OTP');
     } finally {
       setLoading(false);
     }
@@ -60,6 +68,12 @@ const Register = () => {
               <h2 className="text-3xl font-black text-gray-900">Create Account</h2>
               <p className="text-gray-500 mt-2 text-sm">Join the world's largest learning marketplace</p>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-medium mb-6 animate-pulse text-center">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="relative">
@@ -98,17 +112,31 @@ const Register = () => {
                   disabled={loading}
                 />
               </div>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input 
-                  type="password" 
-                  placeholder="Password" 
-                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)} 
-                  required 
-                  disabled={loading}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input 
+                    type="password" 
+                    placeholder="Password" 
+                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)} 
+                    required 
+                    disabled={loading}
+                  />
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input 
+                    type="password" 
+                    placeholder="Confirm" 
+                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                    value={confirmPassword} 
+                    onChange={e => setConfirmPassword(e.target.value)} 
+                    required 
+                    disabled={loading}
+                  />
+                </div>
               </div>
  
               <button 
@@ -129,6 +157,12 @@ const Register = () => {
               <h2 className="text-3xl font-black text-gray-900">Verify Email</h2>
               <p className="text-gray-500 mt-2 text-sm">Enter the 6-digit code sent to <b>{email}</b></p>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-medium mb-6 animate-pulse text-center">
+                {error}
+              </div>
+            )}
  
             <form onSubmit={handleVerifyOTP} className="space-y-6">
               <input 

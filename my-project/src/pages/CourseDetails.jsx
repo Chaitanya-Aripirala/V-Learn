@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { Video, BookOpen, Radio, Calendar, CheckCircle, MessageSquare, Users, Clock, ClipboardList, Trophy, Award, HelpCircle, X, Sparkles, ExternalLink, Coffee, FileText, File, Image as ImageIcon, Link as LinkIcon, UploadCloud, Trash2, Send } from 'lucide-react';
+import { Video, BookOpen, Radio, Calendar, CheckCircle, MessageSquare, Users, Clock, ClipboardList, Trophy, Award, HelpCircle, X, Sparkles, ExternalLink, Coffee, FileText, File, Image as ImageIcon, Link as LinkIcon, UploadCloud, Trash2, Edit3, Send } from 'lucide-react';
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -50,7 +50,28 @@ const CourseDetails = () => {
   const [uploadingResource, setUploadingResource] = useState(false);
   const [isSavingResource, setIsSavingResource] = useState(false);
 
+  // Edit Course Details State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    category: '',
+    price: '',
+    duration: '',
+    accessPeriod: ''
+  });
+  const [isUpdatingCourse, setIsUpdatingCourse] = useState(false);
+
   // Helpers for Cloudinary resource URLs
+  const getPlayableVideoUrl = (url) => {
+    if (!url) return '';
+    if (url.includes('res.cloudinary.com/')) {
+      // Force transcode to .mp4 for guaranteed browser playback (fixes .mkv, .mov, etc)
+      return url.replace(/\.[^/.]+$/, ".mp4");
+    }
+    return url;
+  };
+
   const getViewUrl = (url) => {
     if (!url) return '#';
     // For Cloudinary raw-uploaded files, ensure we use the raw delivery URL
@@ -119,12 +140,53 @@ const CourseDetails = () => {
     }
   };
 
+  const handleOpenEdit = () => {
+    setEditForm({
+      title: course.title,
+      description: course.description,
+      category: course.category,
+      price: course.price,
+      duration: course.duration || '',
+      accessPeriod: course.accessPeriod || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCourse = async (e) => {
+    e.preventDefault();
+    setIsUpdatingCourse(true);
+    try {
+      const res = await api.put(`/courses/${course._id}`, editForm);
+      setCourse(res.data);
+      setShowEditModal(false);
+      alert('Course details updated successfully!');
+    } catch (error) {
+      alert('Failed to update course details');
+    } finally {
+      setIsUpdatingCourse(false);
+    }
+  };
+
+  const handleDeleteCourse = async () => {
+    if (!window.confirm('Are you sure you want to delete this course entirely? This action cannot be undone.')) return;
+    try {
+      await api.delete(`/courses/${course._id}`);
+      alert('Course deleted successfully.');
+      navigate('/mentor-dashboard');
+    } catch (error) {
+      alert('Failed to delete course');
+    }
+  };
+
 
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         const res = await api.get(`/courses/${id}`);
         setCourse(res.data);
+        if (res.data.videos && res.data.videos.length > 0) {
+          setActiveVideo(res.data.videos[0]);
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -546,8 +608,18 @@ const CourseDetails = () => {
                   )}
                 </div>
               ) : isMentor ? (
-                <div className="flex items-center gap-2 text-purple-600 font-bold bg-purple-50 px-4 py-2 rounded-full border border-purple-200">
-                   <Users className="w-5 h-5" /> Course Mentor
+                <div className="flex flex-col gap-3 items-end">
+                  <div className="flex items-center gap-2 text-purple-600 font-bold bg-purple-50 px-4 py-2 rounded-full border border-purple-200">
+                     <Users className="w-5 h-5" /> Course Mentor
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={handleOpenEdit} className="bg-indigo-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-indigo-700 shadow-lg flex items-center gap-2 transition-all">
+                      <Edit3 className="w-4 h-4" /> Edit Details
+                    </button>
+                    <button onClick={handleDeleteCourse} className="bg-red-50 text-red-600 px-5 py-2 rounded-lg font-bold border border-red-200 hover:bg-red-100 flex items-center gap-2 transition-all">
+                      <Trash2 className="w-4 h-4" /> Delete Course
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button 
@@ -757,6 +829,63 @@ const CourseDetails = () => {
         </div>
       )}
 
+      {/* EDIT COURSE MODAL */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setShowEditModal(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white flex justify-between items-center">
+              <h3 className="text-xl font-black flex items-center gap-2"><Edit3 className="w-5 h-5"/> Edit Course Details</h3>
+              <button onClick={() => setShowEditModal(false)} className="hover:bg-white/20 p-2 rounded-xl transition-all"><X className="w-5 h-5"/></button>
+            </div>
+            <form onSubmit={handleUpdateCourse} className="p-6 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase">Course Title</label>
+                <input type="text" className="w-full border-2 border-gray-100 p-3 rounded-xl mt-1 text-sm outline-none focus:border-indigo-500 bg-gray-50 focus:bg-white transition-all" value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} required />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase">Description</label>
+                <textarea rows="4" className="w-full border-2 border-gray-100 p-3 rounded-xl mt-1 text-sm outline-none focus:border-indigo-500 resize-none bg-gray-50 focus:bg-white transition-all" value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})} required></textarea>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase">Category</label>
+                  <select className="w-full border-2 border-gray-100 p-3 rounded-xl mt-1 text-sm outline-none focus:border-indigo-500 bg-gray-50 focus:bg-white transition-all" value={editForm.category} onChange={e => setEditForm({...editForm, category: e.target.value})}>
+                    <option value="Development">Development</option>
+                    <option value="DataScience">Data Science</option>
+                    <option value="ML">Machine Learning</option>
+                    <option value="CyberSecurity">Cyber Security</option>
+                    <option value="IT">IT & Software</option>
+                    <option value="Mechanical">Mechanical</option>
+                    <option value="Business">Business</option>
+                    <option value="Design">Design</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase">Price (₹)</label>
+                  <input type="number" className="w-full border-2 border-gray-100 p-3 rounded-xl mt-1 text-sm outline-none focus:border-indigo-500 bg-gray-50 focus:bg-white transition-all" value={editForm.price} onChange={e => setEditForm({...editForm, price: e.target.value})} required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase">Duration (e.g. 40 hours)</label>
+                  <input type="text" className="w-full border-2 border-gray-100 p-3 rounded-xl mt-1 text-sm outline-none focus:border-indigo-500 bg-gray-50 focus:bg-white transition-all" value={editForm.duration} onChange={e => setEditForm({...editForm, duration: e.target.value})} />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase">Access Period (Days)</label>
+                  <input type="number" className="w-full border-2 border-gray-100 p-3 rounded-xl mt-1 text-sm outline-none focus:border-indigo-500 bg-gray-50 focus:bg-white transition-all" value={editForm.accessPeriod} onChange={e => setEditForm({...editForm, accessPeriod: e.target.value})} />
+                </div>
+              </div>
+              <div className="pt-4 border-t flex justify-end gap-3 mt-6">
+                <button type="button" onClick={() => setShowEditModal(false)} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-100 rounded-xl transition-all">Cancel</button>
+                <button type="submit" disabled={isUpdatingCourse} className="bg-indigo-600 text-white px-8 py-3 font-black rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all shadow-lg shadow-indigo-200">
+                  {isUpdatingCourse ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* BOOK SESSION MODAL */}
       {showBookingModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setShowBookingModal(false)}>
@@ -829,8 +958,8 @@ const CourseDetails = () => {
         </div>
       )}
 
-      {/* Course Content & Schedule (Enrolled Only) */}
-      {isEnrolled && (
+      {/* Course Content & Schedule (Enrolled or Mentor) */}
+      {(isEnrolled || isMentor) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-10 border-t">
           
           {/* Videos & Resources */}
@@ -844,7 +973,7 @@ const CourseDetails = () => {
                 <div className="mb-6 space-y-4">
                   <div className="rounded-xl overflow-hidden shadow-2xl bg-black aspect-video border-4 border-purple-100 flex items-center justify-center">
                     {activeVideo.url.includes('res.cloudinary.com') || activeVideo.url.includes('/api/upload') || activeVideo.url.match(/\.(mp4|webm|ogg)$/i) ? (
-                      <video controls controlsList="nodownload" className="w-full h-full object-contain bg-black" src={activeVideo.url}>
+                      <video controls controlsList="nodownload" className="w-full h-full object-contain bg-black" src={getPlayableVideoUrl(activeVideo.url)}>
                         Your browser does not support the video tag.
                       </video>
                     ) : (

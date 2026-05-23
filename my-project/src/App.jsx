@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster, toast } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import CourseDetails from './pages/CourseDetails';
@@ -19,10 +20,22 @@ import Doubts from './pages/Doubts';
 import Footer from './components/Footer';
 import ChatBot from './components/ChatBot';
 
+// Globally override the ugly default browser alert
+window.alert = (message) => {
+  if (message && message.toString().toLowerCase().includes('success')) {
+    toast.success(message, { duration: 3000, position: 'top-center' });
+  } else if (message && (message.toString().toLowerCase().includes('fail') || message.toString().toLowerCase().includes('error') || message.toString().toLowerCase().includes('invalid'))) {
+    toast.error(message, { duration: 3000, position: 'top-center' });
+  } else {
+    toast(message, { duration: 3000, position: 'top-center', icon: '🔔' });
+  }
+};
+
 function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
+        <Toaster />
         <Navbar />
         <main className="flex-grow">
           <Routes>
