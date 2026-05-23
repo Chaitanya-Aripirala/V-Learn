@@ -9,7 +9,7 @@ const CourseDetails = () => {
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user, addToCart } = useContext(AuthContext);
+  const { user, addToCart, setUser } = useContext(AuthContext);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [isMentor, setIsMentor] = useState(false);
   const [reviews, setReviews] = useState([]);
@@ -61,6 +61,13 @@ const CourseDetails = () => {
     accessPeriod: ''
   });
   const [isUpdatingCourse, setIsUpdatingCourse] = useState(false);
+
+  // Add Video State
+  const [showAddVideoModal, setShowAddVideoModal] = useState(false);
+  const [newVideoForm, setNewVideoForm] = useState({ title: '', description: '', url: '', thumbnail: '' });
+  const [uploadingNewVideo, setUploadingNewVideo] = useState(false);
+  const [uploadingNewThumbnail, setUploadingNewThumbnail] = useState(false);
+  const [isSavingNewVideo, setIsSavingNewVideo] = useState(false);
 
   // Helpers for Cloudinary resource URLs
   const getPlayableVideoUrl = (url) => {
@@ -178,6 +185,61 @@ const CourseDetails = () => {
     }
   };
 
+  const handleDeleteVideo = async (videoId) => {
+    if (!window.confirm('Are you sure you want to delete this video?')) return;
+    try {
+      const res = await api.delete(`/courses/${id}/videos/${videoId}`);
+      setCourse(res.data);
+      if (activeVideo?._id === videoId) setActiveVideo(res.data.videos?.[0] || null);
+      alert('Video deleted successfully');
+    } catch (err) {
+      alert('Failed to delete video');
+    }
+  };
+
+  const handleNewVideoFile = async (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (type === 'video') setUploadingNewVideo(true);
+    else setUploadingNewThumbnail(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await api.post('/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (type === 'video') setNewVideoForm(p => ({ ...p, url: res.data.url }));
+      else setNewVideoForm(p => ({ ...p, thumbnail: res.data.url }));
+    } catch (err) {
+      alert('Upload failed');
+    } finally {
+      if (type === 'video') setUploadingNewVideo(false);
+      else setUploadingNewThumbnail(false);
+    }
+  };
+
+  const handleSaveNewVideo = async (e) => {
+    e.preventDefault();
+    if (!newVideoForm.title || !newVideoForm.url) return alert('Title and Video File are required');
+    setIsSavingNewVideo(true);
+    try {
+      const res = await api.post(`/courses/${id}/videos`, {
+        title: newVideoForm.title,
+        description: newVideoForm.description,
+        videoUrl: newVideoForm.url,
+        thumbnailUrl: newVideoForm.thumbnail
+      });
+      setCourse(res.data);
+      setShowAddVideoModal(false);
+      setNewVideoForm({ title: '', description: '', url: '', thumbnail: '' });
+      alert('Video added successfully!');
+    } catch (err) {
+      alert('Failed to add video');
+    } finally {
+      setIsSavingNewVideo(false);
+    }
+  };
+
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -265,7 +327,7 @@ const CourseDetails = () => {
     if (user && course) {
       const enrollment = user.enrolledCourses?.find(cId => (cId.course?._id || cId.course || cId._id || cId).toString() === course._id.toString());
       setIsEnrolled(!!enrollment);
-      setIsMentor(user.role === 'mentor' && course.mentorId?.toString() === user._id.toString());
+      setIsMentor(user.role === 'mentor' && (course.mentorId?._id || course.mentorId)?.toString() === user._id.toString());
       if (enrollment) fetchEnrollmentDetail();
       fetchStudentDoubts();
     }
@@ -420,6 +482,11 @@ const CourseDetails = () => {
 
     try {
       await api.post('/enrollments', { courseId: course._id });
+      // Update local storage so the new enrollment persists after reload
+      const updatedUser = { ...user, enrolledCourses: [...(user.enrolledCourses || []), { course: course._id }] };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      
       alert('Enrollment successful! You are now enrolled.');
       setIsEnrolled(true);
       window.location.reload();
@@ -965,9 +1032,19 @@ const CourseDetails = () => {
           {/* Videos & Resources */}
           <div className="space-y-8">
             <div>
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <Video className="w-6 h-6 text-purple-600" /> Learning Videos
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Video className="w-6 h-6 text-purple-600" /> Learning Videos
+                </h2>
+                {isMentor && (
+                  <button 
+                    onClick={() => setShowAddVideoModal(true)}
+                    className="bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                  >
+                    <Video className="w-4 h-4" /> Add Video
+                  </button>
+                )}
+              </div>
               
               {activeVideo && activeVideo.url?.trim() !== '' && (
                 <div className="mb-6 space-y-4">
@@ -1022,10 +1099,10 @@ const CourseDetails = () => {
                   course.videos.map((vid, idx) => {
                     const isCompleted = enrollmentData?.completedVideos?.includes(vid._id);
                     return (
-                      <button 
+                      <div 
                         key={idx} 
                         onClick={() => setActiveVideo(vid)}
-                        className={`w-full flex items-start gap-4 p-4 border rounded-lg transition-all group ${activeVideo?.url === vid.url ? 'bg-white border-purple-600 ring-2 ring-purple-100' : 'hover:bg-purple-50 hover:border-purple-200 bg-white'}`}
+                        className={`w-full flex items-start gap-4 p-4 border rounded-lg transition-all group cursor-pointer ${activeVideo?.url === vid.url ? 'bg-white border-purple-600 ring-2 ring-purple-100' : 'hover:bg-purple-50 hover:border-purple-200 bg-white'}`}
                       >
                         <div className="relative">
                           <img 
@@ -1044,7 +1121,16 @@ const CourseDetails = () => {
                           <p className="text-xs text-gray-500 mt-1 line-clamp-1">{vid.description}</p>
                         </div>
                         {activeVideo?.url === vid.url && <div className="bg-purple-600 text-white p-1 rounded-full"><CheckCircle className="w-3 h-3" /></div>}
-                      </button>
+                        {isMentor && (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleDeleteVideo(vid._id); }}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors ml-2"
+                            title="Delete Video"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     );
                   })
                 ) : (
@@ -1600,6 +1686,63 @@ const CourseDetails = () => {
           </div>
         </div>
       </div>
+      {/* Add Video Modal */}
+      {showAddVideoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-gray-900">Add New Video</h3>
+              <button onClick={() => setShowAddVideoModal(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Video Title</label>
+                <input 
+                  type="text" 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-600 outline-none" 
+                  value={newVideoForm.title} 
+                  onChange={e => setNewVideoForm({...newVideoForm, title: e.target.value})} 
+                  placeholder="e.g. Introduction to React"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
+                <textarea 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-purple-600 outline-none min-h-[80px]" 
+                  value={newVideoForm.description} 
+                  onChange={e => setNewVideoForm({...newVideoForm, description: e.target.value})} 
+                  placeholder="What will students learn in this video?"
+                ></textarea>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Thumbnail Image</label>
+                  <input type="file" accept="image/*" onChange={e => handleNewVideoFile(e, 'thumbnail')} disabled={uploadingNewThumbnail} className="text-xs" />
+                  {uploadingNewThumbnail && <p className="text-xs text-purple-600 mt-1 animate-pulse">Uploading...</p>}
+                  {newVideoForm.thumbnail && <p className="text-xs text-green-600 mt-1 font-bold">Uploaded!</p>}
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">MP4 Video File</label>
+                  <input type="file" accept="video/*" onChange={e => handleNewVideoFile(e, 'video')} disabled={uploadingNewVideo} className="text-xs" />
+                  {uploadingNewVideo && <p className="text-xs text-purple-600 mt-1 animate-pulse">Uploading...</p>}
+                  {newVideoForm.url && <p className="text-xs text-green-600 mt-1 font-bold">Uploaded!</p>}
+                </div>
+              </div>
+              
+              <button 
+                onClick={handleSaveNewVideo}
+                disabled={isSavingNewVideo || uploadingNewVideo || uploadingNewThumbnail}
+                className="w-full mt-4 bg-purple-600 text-white font-bold py-3.5 rounded-xl hover:bg-purple-700 transition-all shadow-lg disabled:opacity-50"
+              >
+                {isSavingNewVideo ? 'Adding Video...' : 'Add Video to Course'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 };

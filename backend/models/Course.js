@@ -40,10 +40,13 @@ const courseSchema = mongoose.Schema(
     },
     videos: [
       {
-        url: String,
+        url: String, // fallback
+        videoUrl: String,
         title: String,
         description: String,
-        thumbnail: String
+        thumbnail: String, // fallback
+        thumbnailUrl: String,
+        createdAt: { type: Date, default: Date.now }
       },
     ],
     resources: [

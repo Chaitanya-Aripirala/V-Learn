@@ -165,4 +165,78 @@ router.route('/:id')
     }
   });
 
+// @desc    Add video to existing course
+router.post('/:id/videos', protect, async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    if (course.mentorId.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Not authorized' });
+
+    const { title, description, videoUrl, thumbnailUrl } = req.body;
+    const newVideo = {
+      title,
+      description,
+      url: videoUrl,
+      videoUrl,
+      thumbnail: thumbnailUrl,
+      thumbnailUrl,
+      createdAt: new Date()
+    };
+    course.videos.push(newVideo);
+    await course.save();
+    res.status(201).json(course);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Get all course videos
+router.get('/:id/videos', async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    res.json(course.videos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Update video details
+router.put('/:id/videos/:videoId', protect, async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    if (course.mentorId.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Not authorized' });
+
+    const { title, description, videoUrl, thumbnailUrl } = req.body;
+    const video = course.videos.id(req.params.videoId);
+    if (!video) return res.status(404).json({ message: 'Video not found' });
+
+    if (title !== undefined) video.title = title;
+    if (description !== undefined) video.description = description;
+    if (videoUrl !== undefined) { video.videoUrl = videoUrl; video.url = videoUrl; }
+    if (thumbnailUrl !== undefined) { video.thumbnailUrl = thumbnailUrl; video.thumbnail = thumbnailUrl; }
+
+    await course.save();
+    res.json(course);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @desc    Delete a video from a course
+router.delete('/:id/videos/:videoId', protect, async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    if (course.mentorId.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Not authorized' });
+
+    course.videos = course.videos.filter(v => v._id.toString() !== req.params.videoId);
+    await course.save();
+    res.json(course);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

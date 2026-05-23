@@ -51,6 +51,10 @@ const MentorRegister = () => {
       if (formData.mobileNumber.length < 10) {
         return setError('Mobile number must be at least 10 digits');
       }
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        return setError('Password must be at least 8 characters with a letter, number, and special character');
+      }
       if (formData.password !== formData.confirmPassword) {
         return setError('Passwords do not match');
       }
