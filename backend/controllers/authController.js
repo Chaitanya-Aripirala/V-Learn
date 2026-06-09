@@ -105,19 +105,6 @@ export const registerMentor = async (req, res) => {
   }
 };
 
-// @desc    Resend OTP (stubbed/bypassed)
-// @route   POST /api/auth/send-otp
-// @access  Public
-export const sendOtp = async (req, res) => {
-  res.json({ message: 'OTP send bypassed' });
-};
-
-// @desc    Verify OTP (stubbed/bypassed)
-// @route   POST /api/auth/verify-otp
-// @access  Public
-export const verifyOTP = async (req, res) => {
-  res.json({ message: 'OTP verification bypassed' });
-};
 
 // @desc    Register a new student (instantly verified, no OTP)
 // @route   POST /api/auth/register

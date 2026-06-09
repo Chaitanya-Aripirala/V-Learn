@@ -24,8 +24,6 @@ const MentorRegister = () => {
     }
   });
 
-  const [otpCode, setOtpCode] = useState('');
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name.includes('bankDetails.')) {
@@ -78,21 +76,6 @@ const MentorRegister = () => {
     }
   };
 
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const { data } = await api.post('/auth/verify-otp', { email: formData.email, code: otpCode });
-      alert('Verification successful! Please login.');
-      navigate('/login');
-    } catch (err) {
-      setError(err.response?.data?.message || 'OTP Verification failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 via-white to-purple-50 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-48 h-48 bg-purple-100 rounded-full blur-3xl -z-10 -translate-y-1/2 translate-x-1/2"></div>
@@ -139,16 +122,16 @@ const MentorRegister = () => {
         <div className="p-12">
           {/* Progress Indicator */}
           <div className="flex items-center gap-2 mb-10">
-            {[1, 2, 3].map((s) => (
+            {[1, 2].map((s) => (
               <div key={s} className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= s ? 'bg-indigo-600' : 'bg-gray-100'}`} />
             ))}
           </div>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-2">
-            {step === 1 ? 'Start your journey' : step === 2 ? 'Professional Details' : 'Verify Identity'}
+            {step === 1 ? 'Start your journey' : 'Professional Details'}
           </h3>
           <p className="text-gray-500 text-sm mb-8">
-            {step === 1 ? 'Enter your personal information below.' : step === 2 ? 'Provide bank details for earnings payout (optional).' : `Enter the code sent to ${formData.email}`}
+            {step === 1 ? 'Enter your personal information below.' : 'Provide bank details for earnings payout (optional).'}
           </p>
 
           {error && (
@@ -214,27 +197,6 @@ const MentorRegister = () => {
                 </button>
               </div>
               <p className="text-[10px] text-gray-400 text-center italic mt-4">By completing signup, you agree to our Instructor Terms & Conditions.</p>
-            </form>
-          )}
-
-          {step === 3 && (
-            <form onSubmit={handleVerifyOTP} className="space-y-6">
-              <div className="flex justify-center py-8">
-                <input 
-                  type="text" 
-                  maxLength="6" 
-                  placeholder="000000" 
-                  className="w-full max-w-xs text-center text-4xl font-black tracking-[0.2em] py-4 bg-gray-50 border-2 border-dashed border-indigo-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed" 
-                  value={otpCode} 
-                  onChange={(e) => setOtpCode(e.target.value)} 
-                  required 
-                  disabled={loading}
-                />
-              </div>
-              <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                {loading ? 'Verifying...' : 'Verify OTP'}
-              </button>
-              <button type="button" disabled={loading} className="w-full text-sm font-bold text-indigo-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed">Resend Code</button>
             </form>
           )}
 

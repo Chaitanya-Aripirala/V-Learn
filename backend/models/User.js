@@ -47,17 +47,13 @@ const userSchema = mongoose.Schema(
       ifscCode: { type: String, default: '' },
       bankName: { type: String, default: '' },
     },
-    otp: {
-      code: { type: String },
-      expiresAt: { type: Date },
-    },
     passwordResetOtp: {
       code: { type: String },
       expiresAt: { type: Date },
     },
     isVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     profilePic: {
       type: String,

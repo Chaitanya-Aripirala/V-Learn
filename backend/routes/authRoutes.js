@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 import { protect } from '../middleware/authMiddleware.js';
 
-import { registerMentor, registerUser, verifyOTP, loginUser, sendOtp, forgotPassword, resetPassword, googleAuth } from '../controllers/authController.js';
+import { registerMentor, registerUser, loginUser, forgotPassword, resetPassword, googleAuth } from '../controllers/authController.js';
 import { validateMentorSignup } from '../middleware/validationMiddleware.js';
 
 const router = express.Router();
@@ -12,8 +12,6 @@ const router = express.Router();
 router.post('/register', registerUser);
 // Mentor signup flow
 router.post('/mentor/register', validateMentorSignup, registerMentor);
-router.post('/send-otp', sendOtp);
-router.post('/verify-otp', verifyOTP);
 router.post('/login', loginUser);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
